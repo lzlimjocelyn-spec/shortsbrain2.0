@@ -1,0 +1,1143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">import React, { useState, useEffect, useMemo, useCallback } from 'react';</p>
+<p class="p1">import {</p>
+<p class="p1">  Globe, RefreshCcw, Brain, MapPin, Sparkles, Download,</p>
+<p class="p1">  Layers, Zap, Play, TrendingUp, Users,</p>
+<p class="p1">  Target, ZapOff,</p>
+<p class="p1">  UploadCloud, ClipboardCheck, Flag,</p>
+<p class="p1">  Wand2, Palette, Component as ComponentIcon,</p>
+<p class="p1">  ChevronDown, ChevronUp, FolderKanban, Lightbulb, Copy, Edit2, Save, Plus,</p>
+<p class="p1">  RotateCcw, Binary, Power, Settings2, Trash2,</p>
+<p class="p1">  Database, Clock, CheckCircle2, AlertCircle, Loader2,</p>
+<p class="p1">  Menu, X, Filter, BarChart3, Calendar</p>
+<p class="p1">} from 'lucide-react';</p>
+<p class="p2"><br></p>
+<p class="p1">// --- FIREBASE INTEGRATION ---</p>
+<p class="p1">import { initializeApp } from 'firebase/app';</p>
+<p class="p1">import { </p>
+<p class="p1">  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot </p>
+<p class="p1">} from 'firebase/firestore';</p>
+<p class="p1">import { </p>
+<p class="p1">  getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged </p>
+<p class="p1">} from 'firebase/auth';</p>
+<p class="p2"><br></p>
+<p class="p1">// --- 1. CONFIGURATION &amp; CONSTANTS ---</p>
+<p class="p1">const M_TYPES = ['DAU-SCT', 'DAC-SCT', 'GenAI DAU-SCT', 'Impressions'];</p>
+<p class="p1">const MARKET_SEGMENTS = ['India', 'Indonesia', 'Japan', 'South Korea', 'AUNZ'];</p>
+<p class="p1">const MARKET_KEYS = { 'India': 'IN', 'Indonesia': 'ID', 'Japan': 'JP', 'South Korea': 'KR', 'AUNZ': 'AUNZ' };</p>
+<p class="p1">const MARKET_KEYS_REV = { 'IN': 'India', 'ID': 'Indonesia', 'JP': 'Japan', 'KR': 'South Korea', 'AUNZ': 'AUNZ' };</p>
+<p class="p1">const AO_CATEGORIES = ['SSC', 'Shelf', 'UTS', 'MVR', 'UTS SFV'];</p>
+<p class="p2"><br></p>
+<p class="p1">const GENDERS_KEYS = ['female', 'male', 'total'];</p>
+<p class="p1">const GENDERS_DISPLAY_MAP = { 'female': 'FEMALE', 'male': 'MALE', 'total': 'GenPop' };</p>
+<p class="p1">const AGE_BUCKETS = ['18-24', '25-34', '18-34', '35+', 'total'];</p>
+<p class="p2"><br></p>
+<p class="p1">// RENAMED: 35+ to 35-44 for display</p>
+<p class="p1">const AGE_BUCKETS_DISPLAY_MAP = { </p>
+<p class="p1">  '18-24': '18-24', </p>
+<p class="p1">  '25-34': '25-34', </p>
+<p class="p1">  '18-34': '18-34', </p>
+<p class="p1">  '35+': '35-44', </p>
+<p class="p1">  'total': 'GenPop' </p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const OKR_TARGETS = {</p>
+<p class="p1">  'APAC': 0.15, 'INDIA': 0.16, 'INDONESIA': 0.29, 'JAPAN': 1.2, 'SOUTH KOREA': 1.08, 'AUNZ': 1.56,</p>
+<p class="p1">  'IN': 0.16, 'ID': 0.29, 'JP': 1.2, 'KR': 1.08</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const NAV_ITEMS = [</p>
+<p class="p1">  { id: 'Upload', label: 'Data Ingestion', icon: UploadCloud },</p>
+<p class="p1">  { id: 'OKR', label: 'Shorts OKR Performance', icon: Target },</p>
+<p class="p1">  { id: 'Global Hub', label: 'Global Holdback', icon: Globe },</p>
+<p class="p1">  { id: 'Market Hub', label: 'Campaign Holdback', icon: Layers },</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const CAMPAIGN_CHILDREN = [</p>
+<p class="p1">  { id: 'AlwaysOn', label: 'Always-On', icon: Zap },</p>
+<p class="p1">  { id: 'ScaledCreation', label: 'Scaled Creation', icon: Sparkles },</p>
+<p class="p1">  { id: 'Trends', label: 'Trends', icon: TrendingUp },</p>
+<p class="p1">  { id: 'CultMo', label: 'CultMo', icon: ComponentIcon },</p>
+<p class="p1">  { id: 'ArtMo', label: 'ArtMo', icon: Palette },</p>
+<p class="p1">  { id: 'GenAI Hub', label: 'GenAI Hub', icon: Wand2 }</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const DEMO_PERMS = [</p>
+<p class="p1">  { g: 'total', a: 'total', label: 'GenPop' },</p>
+<p class="p1">  { g: 'total', a: '18-34', label: 'GenPop 18-34' },</p>
+<p class="p1">  { g: 'male', a: 'total', label: 'Male GenPop' },</p>
+<p class="p1">  { g: 'female', a: 'total', label: 'Female GenPop' },</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">// --- 2. GLOBAL UTILITIES ---</p>
+<p class="p2"><br></p>
+<p class="p1">const cleanStr = (s) =&gt; (s || '').toString().replace(/['"]/g, '').replace(/\u00A0/g, ' ').trim();</p>
+<p class="p1">const superClean = (s) =&gt; cleanStr(s).toUpperCase().replace(/[^A-Z0-9]/g, '');</p>
+<p class="p1">const eq = (a, b) =&gt; superClean(a) === superClean(b);</p>
+<p class="p2"><br></p>
+<p class="p1">const resolveMarketCode = (m) =&gt; {</p>
+<p class="p1">  const s = cleanStr(m).toUpperCase();</p>
+<p class="p1">  if (s === 'INDIA' || s === 'IN') return 'IN';</p>
+<p class="p1">  if (s === 'INDONESIA' || s === 'ID') return 'ID';</p>
+<p class="p1">  if (s === 'JAPAN' || s === 'JP') return 'JP';</p>
+<p class="p1">  if (s === 'SOUTH KOREA' || s === 'KR' || s === 'KOREA') return 'KR';</p>
+<p class="p1">  if (s === 'AUNZ' || s === 'AUSTRALIA' || s === 'NZ') return 'AUNZ';</p>
+<p class="p1">  return s;</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">// Fixed to show 0.00 explicitly for numeric zeros</p>
+<p class="p1">const formatCompactNumber = (val) =&gt; {</p>
+<p class="p1">  if (val === 0) return '0.00';</p>
+<p class="p1">  if (val === null || val === undefined || isNaN(val)) return '-';</p>
+<p class="p1">  return new Intl.NumberFormat('en-US', {</p>
+<p class="p1">    notation: 'compact',</p>
+<p class="p1">    maximumFractionDigits: 1</p>
+<p class="p1">  }).format(val);</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const getWeekId = (dateStr) =&gt; {</p>
+<p class="p1">  const d = dateStr ? new Date(dateStr) : new Date();</p>
+<p class="p1">  if (isNaN(d.getTime())) return `SNAPSHOT-${Date.now()}`;</p>
+<p class="p1">  const year = d.getFullYear();</p>
+<p class="p1">  const oneJan = new Date(year, 0, 1);</p>
+<p class="p1">  const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));</p>
+<p class="p1">  const result = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);</p>
+<p class="p1">  return `${year}-W${result.toString().padStart(2, '0')}`;</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const robustParseDate = (dateStr) =&gt; {</p>
+<p class="p1">  const d = cleanStr(dateStr);</p>
+<p class="p1">  if (!d || d === '-' || d === 'Unknown') return null;</p>
+<p class="p1">  try {</p>
+<p class="p1">    if (d.includes('-') &amp;&amp; d.split('-')[0].length === 4) return d;</p>
+<p class="p1">    const parts = d.split(/[-/]/);</p>
+<p class="p1">    if (parts.length === 3) {</p>
+<p class="p1">      let v1 = parseInt(parts[0], 10), v2 = parseInt(parts[1], 10), y = parseInt(parts[2], 10);</p>
+<p class="p1">      if (y &lt; 100) y += 2000;</p>
+<p class="p1">      let month, day;</p>
+<p class="p1">      if (v1 &gt; 12) { day = v1; month = v2; }</p>
+<p class="p1">      else if (v2 &gt; 12) { month = v1; day = v2; }</p>
+<p class="p1">      else { day = v1; month = v2; }</p>
+<p class="p1">      if (month &gt; 12) return null;</p>
+<p class="p1">      return `${y}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;</p>
+<p class="p1">    }</p>
+<p class="p1">    const date = new Date(d);</p>
+<p class="p1">    return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];</p>
+<p class="p1">  } catch { return null; }</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const calcDaysLive = (startStr, endStr) =&gt; {</p>
+<p class="p1">  const start = robustParseDate(startStr);</p>
+<p class="p1">  const end = robustParseDate(endStr); </p>
+<p class="p1">  if (!start || !end) return 0;</p>
+<p class="p1">  try {</p>
+<p class="p1">    const s = new Date(start), e = new Date(end);</p>
+<p class="p1">    const diffTime = e.getTime() - s.getTime();</p>
+<p class="p1">    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));</p>
+<p class="p1">    return diffDays &gt;= 0 ? diffDays + 1 : 0;</p>
+<p class="p1">  } catch { return 0; }</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const isCampaignEnded = (optEndDateStr, campaignEndDateStr) =&gt; {</p>
+<p class="p1">  const optDate = robustParseDate(optEndDateStr);</p>
+<p class="p1">  const campDate = robustParseDate(campaignEndDateStr);</p>
+<p class="p1">  if (!optDate || !campDate) return false;</p>
+<p class="p1">  try { return new Date(optDate) &gt;= new Date(campDate); } catch { return false; }</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const splitCSVLine = (line) =&gt; {</p>
+<p class="p1">  const columns = [];</p>
+<p class="p1">  let current = "", inQuotes = false;</p>
+<p class="p1">  for (let i = 0; i &lt; line.length; i++) {</p>
+<p class="p1">    const char = line[i];</p>
+<p class="p1">    if (char === '"') inQuotes = !inQuotes;</p>
+<p class="p1">    else if (char === ',' &amp;&amp; !inQuotes) { columns.push(current.trim()); current = ""; }</p>
+<p class="p1">    else { current += char; }</p>
+<p class="p1">  }</p>
+<p class="p1">  columns.push(current.trim());</p>
+<p class="p1">  return columns;</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const findHeader = (headers, targets) =&gt; {</p>
+<p class="p1">  const upperHeaders = headers.map(h =&gt; (h || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));</p>
+<p class="p1">  const targetUpper = targets.map(t =&gt; t.toUpperCase().replace(/[^A-Z0-9]/g, ''));</p>
+<p class="p1">  for (const target of targetUpper) {</p>
+<p class="p1">    const idx = upperHeaders.indexOf(target);</p>
+<p class="p1">    if (idx !== -1) return idx;</p>
+<p class="p1">  }</p>
+<p class="p1">  return upperHeaders.findIndex(h =&gt; targetUpper.some(t =&gt; h.includes(t)));</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const findMetadata = (rowKey, metaMap, marketContext = null) =&gt; {</p>
+<p class="p1">  const campKey = superClean(rowKey);</p>
+<p class="p1">  if (marketContext) {</p>
+<p class="p1">    const mktKey = superClean(marketContext);</p>
+<p class="p1">    if (metaMap[mktKey]?.[campKey]) return metaMap[mktKey][campKey];</p>
+<p class="p1">  }</p>
+<p class="p1">  for (const m in metaMap) {</p>
+<p class="p1">    if (metaMap[m][campKey]) return metaMap[m][campKey];</p>
+<p class="p1">  }</p>
+<p class="p1">  return {};</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const parseCSVData = (text, existingAcc = {}, metaMap = {}, searchPriority = ['Campaign', 'Campaign Name', 'Country', 'Market'], forceAbs = false, marketContext = null) =&gt; {</p>
+<p class="p1">  try {</p>
+<p class="p1">    const lines = text.split(/\r?\n/).filter(line =&gt; line.trim() !== '');</p>
+<p class="p1">    if (lines.length &lt; 2) return existingAcc;</p>
+<p class="p1">    const headers = splitCSVLine(lines[0]);</p>
+<p class="p1">    const identifierIdx = findHeader(headers, searchPriority);</p>
+<p class="p1">    const valTypeIdx = findHeader(headers, ['Value Type', 'Metric Type']);</p>
+<p class="p1">    const sliceIdx = findHeader(headers, ['Slice']);</p>
+<p class="p1">    const dateIdx = findHeader(headers, ['Date', 'Reporting Date', 'Day']);</p>
+<p class="p1">    const dataStartIdx = findHeader(headers, ['Start Date', 'Trend Start', 'Trend Start Date']);</p>
+<p class="p1">    const dataEndIdx = findHeader(headers, ['End Date', 'Trend End', 'Trend End Date']);</p>
+<p class="p2"><br></p>
+<p class="p1">    if (identifierIdx === -1 || (valTypeIdx === -1 &amp;&amp; !forceAbs)) return existingAcc;</p>
+<p class="p1">    const acc = { ...existingAcc };</p>
+<p class="p2"><br></p>
+<p class="p1">    lines.slice(1).forEach(line =&gt; {</p>
+<p class="p1">      const columns = splitCSVLine(line);</p>
+<p class="p1">      const rowValTypeRaw = valTypeIdx !== -1 ? (columns[valTypeIdx] || '').replace(/['"]/g, '').trim().toUpperCase() : '';</p>
+<p class="p1">      const rowSlice = sliceIdx !== -1 ? (columns[sliceIdx] || '').replace(/['"]/g, '').trim().toUpperCase() : '';</p>
+<p class="p1">      const rowDate = dateIdx !== -1 ? robustParseDate(columns[dateIdx]) : null;</p>
+<p class="p2"><br></p>
+<p class="p1">      const isRatioRow = !forceAbs &amp;&amp; (rowValTypeRaw === 'RATIO (%)' || rowValTypeRaw === 'RATIO' || rowValTypeRaw.includes('LIFT')) &amp;&amp; (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');</p>
+<p class="p1">      const isAbsRow = forceAbs &amp;&amp; (rowValTypeRaw === 'DELTA' || rowValTypeRaw === '' || rowValTypeRaw === 'TOTAL') &amp;&amp; (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');</p>
+<p class="p1">      const isSigRow = rowValTypeRaw.includes('TREND FAVORABILITY') &amp;&amp; (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');</p>
+<p class="p2"><br></p>
+<p class="p1">      if (!isRatioRow &amp;&amp; !isSigRow &amp;&amp; !isAbsRow) return;</p>
+<p class="p2"><br></p>
+<p class="p1">      const rowKey = cleanStr(columns[identifierIdx]) || 'Unknown';</p>
+<p class="p1">      let gender = 'total';</p>
+<p class="p1">      const gIdx = findHeader(headers, ['Gender']);</p>
+<p class="p1">      if (gIdx !== -1) {</p>
+<p class="p1">        const rawG = (columns[gIdx] || '').toLowerCase().trim();</p>
+<p class="p1">        if (rawG === 'female' || rawG === 'f') gender = 'female';</p>
+<p class="p1">        else if (rawG === 'male' || rawG === 'm') gender = 'male';</p>
+<p class="p1">        else if (rawG === 'total' || rawG === 'genpop' || rawG === 'all' || rawG === '') gender = 'total';</p>
+<p class="p1">      }</p>
+<p class="p1">      let age = 'total';</p>
+<p class="p1">      const aIdx = findHeader(headers, ['Age', 'Age Group']);</p>
+<p class="p1">      if (aIdx !== -1) {</p>
+<p class="p1">        const rawA = (columns[aIdx] || '').toLowerCase().trim();</p>
+<p class="p1">        if (rawA.includes('18-24')) age = '18-24';</p>
+<p class="p1">        else if (rawA.includes('25-34')) age = '25-34';</p>
+<p class="p1">        else if (rawA.includes('18-34')) age = '18-34';</p>
+<p class="p1">        else if (rawA.includes('35')) age = '35+';</p>
+<p class="p1">        else if (rawA === 'total' || rawA === 'genpop' || rawA === 'all' || rawA === '') age = 'total';</p>
+<p class="p1">      }</p>
+<p class="p2"><br></p>
+<p class="p1">      if (!acc[rowKey]) {</p>
+<p class="p1">        const meta = findMetadata(rowKey, metaMap, marketContext);</p>
+<p class="p1">        const startVal = meta.campaignStartDate || (dataStartIdx !== -1 ? robustParseDate(columns[dataStartIdx]) : null);</p>
+<p class="p1">        const endVal = meta.campaignEndDate || (dataEndIdx !== -1 ? robustParseDate(columns[dataEndIdx]) : null);</p>
+<p class="p2"><br></p>
+<p class="p1">        acc[rowKey] = {</p>
+<p class="p1">          country: rowKey,</p>
+<p class="p1">          metrics: {},</p>
+<p class="p1">          isAnchor: superClean(rowKey).includes('GLOBALHOLDBACK'),</p>
+<p class="p1">          campaignStartDate: startVal,</p>
+<p class="p1">          campaignEndDate: endVal,</p>
+<p class="p1">          optimisationEndDate: meta.optimisationEndDate || rowDate, </p>
+<p class="p1">          segmentTag: meta.subTab || 'Campaign Hub',</p>
+<p class="p1">          meta: meta</p>
+<p class="p1">        };</p>
+<p class="p1">        M_TYPES.forEach(m =&gt; {</p>
+<p class="p1">          acc[rowKey].metrics[m] = { female: {}, male: {}, total: {} };</p>
+<p class="p1">          GENDERS_KEYS.forEach(g =&gt; {</p>
+<p class="p1">            AGE_BUCKETS.forEach(a =&gt; acc[rowKey].metrics[m][g][a] = { v: 0, sig: 0, abs: 0, isPaused: false, launchDate: null });</p>
+<p class="p1">          });</p>
+<p class="p1">        });</p>
+<p class="p1">      }</p>
+<p class="p2"><br></p>
+<p class="p1">      if (rowDate &amp;&amp; (!acc[rowKey].optimisationEndDate || rowDate &gt; acc[rowKey].optimisationEndDate)) {</p>
+<p class="p1">          acc[rowKey].optimisationEndDate = rowDate;</p>
+<p class="p1">      }</p>
+<p class="p2"><br></p>
+<p class="p1">      M_TYPES.forEach(m =&gt; {</p>
+<p class="p1">        const aliases = {</p>
+<p class="p1">          'DAU-SCT': ['DAU-SCT', 'DAILY SHORTS CREATION TOOL ACTIVE USERS'],</p>
+<p class="p1">          'DAC-SCT': ['DAC-SCT', 'DAILY SHORTS CONVERTERS'],</p>
+<p class="p1">          'GenAI DAU-SCT': ['GENAI DAU', 'GENAI DAILY ACTIVE USERS'],</p>
+<p class="p1">          'Impressions': ['IMPRESSIONS', 'TOTAL IMPRESSIONS', 'REACH']</p>
+<p class="p1">        };</p>
+<p class="p1">        const targetCol = headers.findIndex(h =&gt; {</p>
+<p class="p1">          const hUpper = h.toUpperCase();</p>
+<p class="p1">          const matchAlias = (aliases[m] || []).some(alias =&gt; hUpper.includes(alias));</p>
+<p class="p1">          return matchAlias &amp;&amp; !(hUpper.includes('CONFIDENCE') || hUpper.includes('BOUND'));</p>
+<p class="p1">        });</p>
+<p class="p2"><br></p>
+<p class="p1">        if (targetCol === -1) return;</p>
+<p class="p1">        const rawCell = (columns[targetCol] || '').replace(/['"]/g, '').trim();</p>
+<p class="p1">        const numericVal = parseFloat(rawCell.replace(/[^\d.-]/g, '')) || 0;</p>
+<p class="p2"><br></p>
+<p class="p1">        if (isRatioRow) acc[rowKey].metrics[m][gender][age].v = numericVal;</p>
+<p class="p1">        else if (isAbsRow) {</p>
+<p class="p1">          if (m === 'Impressions') acc[rowKey].metrics[m][gender][age].v = numericVal;</p>
+<p class="p1">          else acc[rowKey].metrics[m][gender][age].abs = numericVal;</p>
+<p class="p1">        }</p>
+<p class="p1">        else if (isSigRow) {</p>
+<p class="p1">          const sigText = rawCell.toUpperCase();</p>
+<p class="p1">          acc[rowKey].metrics[m][gender][age].sig = (sigText.includes('POSITIVE') || sigText.includes('SSP')) ? 1 : (sigText.includes('NEGATIVE') || sigText.includes('SSN') ? -1 : 0);</p>
+<p class="p1">        }</p>
+<p class="p1">      });</p>
+<p class="p1">    });</p>
+<p class="p1">    return acc;</p>
+<p class="p1">  } catch { return existingAcc; }</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">// --- 3. UI VIEW COMPONENTS ---</p>
+<p class="p2"><br></p>
+<p class="p1">const HubRowV2 = ({ type, title, icon: Icon, tag, uploadedFiles, handleFileUpload }) =&gt; {</p>
+<p class="p1">  const isPct = type === 'pct';</p>
+<p class="p1">  const bgColor = isPct ? 'bg-[#1a1500]' : 'bg-[#0a0a0a]';</p>
+<p class="p1">  const borderColor = isPct ? 'border-amber-500/30' : 'border-blue-500/30';</p>
+<p class="p1">  const iconColor = isPct ? 'text-amber-500' : 'text-blue-500';</p>
+<p class="p1">  const iconBg = isPct ? 'bg-amber-500/20' : 'bg-blue-500/20';</p>
+<p class="p2"><br></p>
+<p class="p1">  return (</p>
+<p class="p1">    &lt;div className={`p-6 rounded-lg border ${borderColor} ${bgColor} mb-6 transition-all shadow-xl`}&gt;</p>
+<p class="p1">      &lt;div className="flex items-center gap-4 mb-6 px-4"&gt;</p>
+<p class="p1">        &lt;div className={`p-2 rounded-lg flex items-center justify-center ${iconBg} ${iconColor}`}&gt;</p>
+<p class="p1">          &lt;Icon className="w-5 h-5" /&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;div className="text-left"&gt;</p>
+<p class="p1">          &lt;h2 className={`text-lg font-bold uppercase tracking-tight ${iconColor}`}&gt;{title}&lt;/h2&gt;</p>
+<p class="p1">          &lt;p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]"&gt;{tag}&lt;/p&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p1">      &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-left items-stretch"&gt;</p>
+<p class="p1">        &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center text-center"&gt;</p>
+<p class="p1">          &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload(type, 'global', e.target.files[0])} /&gt;</p>
+<p class="p1">          &lt;div className={`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all ${uploadedFiles[type].global ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;</p>
+<p class="p1">            &lt;Globe className="w-7 h-7" /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">          &lt;h3 className="font-bold text-[10px] mb-1.5 uppercase tracking-wider text-[#e0e0e0]"&gt;Global Hub Master&lt;/h3&gt;</p>
+<p class="p1">          &lt;div className="text-[8px] font-mono truncate w-full px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080] mb-2 text-center"&gt;</p>
+<p class="p1">            {uploadedFiles[type].global ? uploadedFiles[type].global.name : 'PUSH_MASTER_FILE'}</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center"&gt;</p>
+<p class="p1">          &lt;div className={`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all ${Object.keys(uploadedFiles[type].countryHB).length &gt; 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;</p>
+<p class="p1">            &lt;Flag className="w-7 h-7" /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">          &lt;h3 className="font-bold text-[10px] mb-3 uppercase tracking-wider text-[#e0e0e0]"&gt;Market Hub Nodes&lt;/h3&gt;</p>
+<p class="p1">          &lt;div className="w-full grid grid-cols-5 gap-1 px-1"&gt;</p>
+<p class="p1">            {MARKET_SEGMENTS.map(m =&gt; (</p>
+<p class="p1">              &lt;div key={m} className="relative aspect-square group/item"&gt;</p>
+<p class="p1">                &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload(type, 'countryHB', e.target.files[0], m)} /&gt;</p>
+<p class="p1">                &lt;div className={`w-full h-full rounded-lg border flex items-center justify-center transition-all ${uploadedFiles[type].countryHB[m] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-black border-[#3a3a3a] text-[#555] hover:border-[#808080]'}`}&gt;</p>
+<p class="p1">                  &lt;span className="text-[7px] font-black uppercase"&gt;{MARKET_KEYS[m]}&lt;/span&gt;</p>
+<p class="p1">                &lt;/div&gt;</p>
+<p class="p1">              &lt;/div&gt;</p>
+<p class="p1">            ))}</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center"&gt;</p>
+<p class="p1">          &lt;div className={`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all ${Object.keys(uploadedFiles[type].alwaysOn).length &gt; 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;</p>
+<p class="p1">            &lt;Zap className="w-7 h-7" /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">          &lt;h3 className="font-bold text-[10px] mb-3 uppercase tracking-wider text-[#e0e0e0]"&gt;Always-On Trends&lt;/h3&gt;</p>
+<p class="p1">          &lt;div className="w-full grid grid-cols-2 gap-1.5 px-2"&gt;</p>
+<p class="p1">            {AO_CATEGORIES.map(cat =&gt; (</p>
+<p class="p1">              &lt;div key={cat} className="relative h-7 group/item"&gt;</p>
+<p class="p1">                &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload(type, 'alwaysOn', e.target.files[0], cat)} /&gt;</p>
+<p class="p1">                &lt;div className={`w-full h-full rounded-lg border flex items-center justify-center transition-all ${uploadedFiles[type].alwaysOn[cat] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-black border-[#3a3a3a] text-[#555] hover:border-[#808080]'}`}&gt;</p>
+<p class="p1">                  &lt;span className="text-[7px] font-black uppercase"&gt;{cat}&lt;/span&gt;</p>
+<p class="p1">                &lt;/div&gt;</p>
+<p class="p1">              &lt;/div&gt;</p>
+<p class="p1">            ))}</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  );</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const LandingPage = ({ uploadedFiles, handleFileUpload, startAnalysis, isAnalyzing }) =&gt; (</p>
+<p class="p1">  &lt;div className="min-h-screen bg-black relative flex flex-col items-center py-10 px-6 text-[#e0e0e0] overflow-y-auto"&gt;</p>
+<p class="p1">    &lt;div className="max-w-[1500px] w-full z-10 text-center"&gt;</p>
+<p class="p1">      &lt;div className="mb-12"&gt;</p>
+<p class="p1">        &lt;div className="inline-block mb-4"&gt;</p>
+<p class="p1">          &lt;div className="bg-[#FF0000] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-red-500/20"&gt;&lt;Brain className="text-white w-8 h-8" /&gt;&lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;h1 className="text-4xl font-bold tracking-tighter mb-1 uppercase"&gt;Shorts Brain &lt;span className="text-[#FF0000]"&gt;2.0&lt;/span&gt;&lt;/h1&gt;</p>
+<p class="p1">        &lt;p className="text-[#808080] text-[10px] font-bold tracking-[0.4em] uppercase"&gt;APAC Marketing Incrementality Hub&lt;/p&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;div className="p-6 rounded-lg border border-emerald-500/30 bg-[#0a1a0a] mb-6 transition-all shadow-xl"&gt;</p>
+<p class="p1">        &lt;div className="flex items-center gap-4 mb-6 px-4"&gt;</p>
+<p class="p1">          &lt;div className="p-2 rounded-lg flex items-center justify-center bg-emerald-500/20 text-emerald-500"&gt;&lt;Settings2 className="w-5 h-5" /&gt;&lt;/div&gt;</p>
+<p class="p1">          &lt;div className="text-left"&gt;</p>
+<p class="p1">            &lt;h2 className="text-lg font-bold uppercase tracking-tight text-emerald-500"&gt;Structural Metadata Configuration&lt;/h2&gt;</p>
+<p class="p1">            &lt;p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]"&gt;Campaign Definitions &amp; State Instructions&lt;/p&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4"&gt;</p>
+<p class="p1">          &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all"&gt;</p>
+<p class="p1">            &lt;div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${uploadedFiles.shared.campaignInfo ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;&lt;ClipboardCheck className="w-6 h-6" /&gt;&lt;/div&gt;</p>
+<p class="p1">            &lt;div className="flex-1 text-left min-w-0"&gt;</p>
+<p class="p1">              &lt;h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1"&gt;structural hierarchy&lt;/h4&gt;</p>
+<p class="p1">              &lt;div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]"&gt;{uploadedFiles.shared.campaignInfo ? uploadedFiles.shared.campaignInfo.name : 'PUSH_STRUCTURAL_CSV'}&lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">            &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload('shared', 'campaignInfo', e.target.files[0])} /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">          &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all"&gt;</p>
+<p class="p1">            &lt;div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${uploadedFiles.shared.pauseRelive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;&lt;Power className="w-6 h-6" /&gt;&lt;/div&gt;</p>
+<p class="p1">            &lt;div className="flex-1 text-left min-w-0"&gt;</p>
+<p class="p1">              &lt;h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1"&gt;State Instructions&lt;/h4&gt;</p>
+<p class="p1">              &lt;div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]"&gt;{uploadedFiles.shared.pauseRelive ? uploadedFiles.shared.pauseRelive.name : 'PUSH_INSTRUCTIONS_CSV'}&lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">            &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload('shared', 'pauseRelive', e.target.files[0])} /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;HubRowV2 type="pct" title="Ratio-Based Analysis" tag="Relative Lift Streams (%)" icon={TrendingUp} uploadedFiles={uploadedFiles} handleFileUpload={handleFileUpload} /&gt;</p>
+<p class="p1">      &lt;HubRowV2 type="abs" title="Volume-Based Analysis" tag="Discrete Delta Streams (Delta)" icon={Binary} uploadedFiles={uploadedFiles} handleFileUpload={handleFileUpload} /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;div className="p-6 rounded-lg border border-purple-500/30 bg-[#0d0a1a] mb-6 transition-all shadow-xl"&gt;</p>
+<p class="p1">        &lt;div className="flex items-center gap-4 mb-6 px-4"&gt;</p>
+<p class="p1">          &lt;div className="p-2 rounded-lg flex items-center justify-center bg-purple-500/20 text-purple-500"&gt;&lt;Target className="w-5 h-5" /&gt;&lt;/div&gt;</p>
+<p class="p1">          &lt;div className="text-left"&gt;</p>
+<p class="p1">            &lt;h2 className="text-lg font-bold uppercase tracking-tight text-purple-500"&gt;Attribution Analysis&lt;/h2&gt;</p>
+<p class="p1">            &lt;p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]"&gt;Marketing Pressure &amp; Reach Metrics&lt;/p&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4"&gt;</p>
+<p class="p1">          &lt;div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all"&gt;</p>
+<p class="p1">            &lt;div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${uploadedFiles.attribution.impressions ? 'bg-purple-500/10 text-purple-400' : 'bg-[#1a1a1a] text-[#555]'}`}&gt;&lt;BarChart3 className="w-6 h-6" /&gt;&lt;/div&gt;</p>
+<p class="p1">            &lt;div className="flex-1 text-left min-w-0"&gt;</p>
+<p class="p1">              &lt;h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1"&gt;Impressions CSV&lt;/h4&gt;</p>
+<p class="p1">              &lt;div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]"&gt;{uploadedFiles.attribution.impressions ? uploadedFiles.attribution.impressions.name : 'PUSH_IMPRESSIONS_CSV'}&lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">            &lt;input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange={(e) =&gt; handleFileUpload('attribution', 'impressions', e.target.files[0])} /&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;button type="button" onClick={() =&gt; startAnalysis()} disabled={isAnalyzing} className="px-12 py-5 rounded-2xl font-bold text-base bg-[#FF0000] text-white transition-all hover:bg-red-500 flex items-center gap-4 mx-auto uppercase mt-8 border border-white/10 shadow-2xl shadow-red-500/30 active:scale-95 disabled:opacity-50"&gt;</p>
+<p class="p1">        {isAnalyzing ? &lt;RefreshCcw className="w-5 h-5 animate-spin" /&gt; : &lt;Play className="w-5 h-5" /&gt;}</p>
+<p class="p1">        {isAnalyzing ? 'Processing APAC Data Streams...' : 'Execute Intelligent Engine'}</p>
+<p class="p1">      &lt;/button&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  &lt;/div&gt;</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">const MetricControlHub = ({ activeMetrics, toggleMetric, handleAllToggle, allowedMetrics = M_TYPES }) =&gt; (</p>
+<p class="p1">  &lt;div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#3a3a3a] flex flex-col sm:flex-row items-center justify-between gap-4 mb-6"&gt;</p>
+<p class="p1">    &lt;div className="flex flex-wrap gap-2 bg-black p-1 rounded-lg border border-[#3a3a3a]"&gt;</p>
+<p class="p1">      {allowedMetrics.map(m =&gt; (</p>
+<p class="p1">        &lt;button key={m} type="button" onClick={() =&gt; toggleMetric(m)} className={`px-5 py-2.5 rounded-md text-[10px] font-bold tracking-widest uppercase transition-all cursor-pointer ${activeMetrics.includes(m) ? 'bg-[#FF0000] text-white' : 'text-[#808080] hover:text-white'}`}&gt;</p>
+<p class="p1">          {m}</p>
+<p class="p1">        &lt;/button&gt;</p>
+<p class="p1">      ))}</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">    &lt;button type="button" onClick={() =&gt; handleAllToggle()} className={`px-6 py-2.5 rounded-md text-[10px] font-bold tracking-widest uppercase border transition-all cursor-pointer ${activeMetrics.length === allowedMetrics.length ? 'bg-white text-black border-white' : 'bg-transparent text-[#808080] border-[#3a3a3a] hover:border-[#808080]'}`}&gt;</p>
+<p class="p1">      {activeMetrics.length === allowedMetrics.length ? 'Selective View' : 'Sync All Metrics'}</p>
+<p class="p1">    &lt;/button&gt;</p>
+<p class="p1">  &lt;/div&gt;</p>
+<p class="p1">);</p>
+<p class="p2"><br></p>
+<p class="p1">const MasterTableView = ({ data, activeMetrics, isCampaignView = false, hideDates = false, isAlwaysOn = false }) =&gt; {</p>
+<p class="p1">  const themes = {</p>
+<p class="p1">    female: { 1: 'bg-blue-900/40 text-blue-100', 2: 'bg-blue-900/20', 3: 'bg-blue-950/40 text-blue-400' },</p>
+<p class="p1">    male: { 1: 'bg-purple-900/40 text-purple-100', 2: 'bg-purple-900/20', 3: 'bg-purple-950/40 text-purple-400' },</p>
+<p class="p1">    total: { 1: 'bg-amber-900/80 text-amber-50', 2: 'bg-amber-800/20', 3: 'bg-amber-950 text-amber-400 font-bold' }</p>
+<p class="p1">  };</p>
+<p class="p2"><br></p>
+<p class="p1">  const activeAges = AGE_BUCKETS;</p>
+<p class="p2"><br></p>
+<p class="p1">  if (!data || data.length === 0) return (</p>
+<p class="p1">    &lt;div className="py-40 text-center flex flex-col items-center justify-center gap-6"&gt;</p>
+<p class="p1">      &lt;div className="p-6 rounded-full bg-[#1a1a1a] border border-[#3a3a3a]"&gt;&lt;ZapOff className="w-12 h-12 text-[#3a3a3a] animate-pulse" /&gt;&lt;/div&gt;</p>
+<p class="p1">      &lt;p className="text-[#808080] font-bold text-sm uppercase tracking-widest"&gt;No Data Available&lt;/p&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  );</p>
+<p class="p2"><br></p>
+<p class="p1">  return (</p>
+<p class="p1">    &lt;div className="bg-[#1a1a1a] rounded-lg border border-[#3a3a3a] overflow-hidden overflow-x-auto"&gt;</p>
+<p class="p1">      &lt;table className="w-full text-center border-collapse"&gt;</p>
+<p class="p1">        &lt;thead&gt;</p>
+<p class="p1">          &lt;tr className="text-[11px] font-bold uppercase tracking-widest border-b border-[#3a3a3a]"&gt;</p>
+<p class="p1">            &lt;th rowSpan={3} className="px-8 py-8 text-left border-r border-[#3a3a3a] bg-[#1a1a1a] sticky left-0 z-40 text-white min-w-[300px]"&gt;</p>
+<p class="p1">              {isAlwaysOn ? 'Trend Identifier' : (isCampaignView ? 'Campaign Entity' : 'Country / Market')}</p>
+<p class="p1">            &lt;/th&gt;</p>
+<p class="p1">            {GENDERS_KEYS.map((g, gi) =&gt; (</p>
+<p class="p1">              &lt;th key={g} colSpan={activeAges.length * activeMetrics.length} className={`py-6 border-white/10 ${themes[g][1]} ${gi &lt; GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : ''}`}&gt;</p>
+<p class="p1">                &lt;div className="flex items-center justify-center gap-3"&gt;&lt;Users className="w-4 h-4 opacity-50" /&gt;{GENDERS_DISPLAY_MAP[g]}&lt;/div&gt;</p>
+<p class="p1">              &lt;/th&gt;</p>
+<p class="p1">            ))}</p>
+<p class="p1">          &lt;/tr&gt;</p>
+<p class="p1">          &lt;tr className="text-[10px] font-bold uppercase tracking-widest border-b border-[#3a3a3a]"&gt;</p>
+<p class="p1">            {GENDERS_KEYS.map((g) =&gt; (</p>
+<p class="p1">              &lt;React.Fragment key={g}&gt;</p>
+<p class="p1">                {activeAges.map((a, ai) =&gt; (</p>
+<p class="p1">                  &lt;th key={a} colSpan={activeMetrics.length} className={`py-4 transition-colors ${themes[g][2]} ${ai === activeAges.length - 1 &amp;&amp; GENDERS_KEYS.indexOf(g) &lt; GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'}`}&gt;{AGE_BUCKETS_DISPLAY_MAP[a]}&lt;/th&gt;</p>
+<p class="p1">                ))}</p>
+<p class="p1">              &lt;/React.Fragment&gt;</p>
+<p class="p1">            ))}</p>
+<p class="p1">          &lt;/tr&gt;</p>
+<p class="p1">          &lt;tr className="text-[9px] font-bold uppercase tracking-[0.2em] border-b border-[#3a3a3a]"&gt;</p>
+<p class="p1">            {GENDERS_KEYS.map((g) =&gt; (</p>
+<p class="p1">              &lt;React.Fragment key={g}&gt;</p>
+<p class="p1">                {activeAges.map((a, ai) =&gt; (</p>
+<p class="p1">                  &lt;React.Fragment key={a}&gt;</p>
+<p class="p1">                    {activeMetrics.map((m, mi) =&gt; (</p>
+<p class="p1">                      &lt;th key={m} className={`py-3 px-3 font-mono ${themes[g][3]} ${ai === activeAges.length - 1 &amp;&amp; mi === activeMetrics.length - 1 &amp;&amp; GENDERS_KEYS.indexOf(g) &lt; GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'}`}&gt;{m.includes('GenAI') ? 'GenAI' : (m === 'Impressions' ? 'Imprs' : m.split('-')[0])}&lt;/th&gt;</p>
+<p class="p1">                    ))}</p>
+<p class="p1">                  &lt;/React.Fragment&gt;</p>
+<p class="p1">                ))}</p>
+<p class="p1">              &lt;/React.Fragment&gt;</p>
+<p class="p1">            ))}</p>
+<p class="p1">          &lt;/tr&gt;</p>
+<p class="p1">        &lt;/thead&gt;</p>
+<p class="p1">        &lt;tbody className="divide-y divide-white/5"&gt;</p>
+<p class="p1">          {data.map((row, ri) =&gt; {</p>
+<p class="p1">            const isAnchorRow = !!row.isAnchor;</p>
+<p class="p1">            const daysLive = isAlwaysOn </p>
+<p class="p1">              ? calcDaysLive(row.campaignStartDate, row.campaignEndDate || row.optimisationEndDate)</p>
+<p class="p1">              : calcDaysLive(row.campaignStartDate, row.optimisationEndDate);</p>
+<p class="p1">            </p>
+<p class="p1">            return (</p>
+<p class="p1">              &lt;tr key={ri} className={`transition-all duration-200 ${isAnchorRow ? 'bg-white/[0.05]' : 'hover:bg-white/[0.03]'}`}&gt;</p>
+<p class="p1">                &lt;td className={`px-8 py-5 text-left border-r border-[#3a3a3a] sticky left-0 z-10 bg-[#111] ${isAnchorRow ? 'text-blue-400 font-bold' : 'text-[#e0e0e0]'}`}&gt;</p>
+<p class="p1">                  &lt;div className="flex flex-col gap-1.5"&gt;</p>
+<p class="p1">                    &lt;span className="font-bold text-[12px] uppercase tracking-tight"&gt;{row.country}&lt;/span&gt;</p>
+<p class="p1">                    {!hideDates &amp;&amp; !isAnchorRow &amp;&amp; (row.campaignStartDate || isAlwaysOn) &amp;&amp; (</p>
+<p class="p1">                      &lt;div className="flex flex-col gap-1.5 mt-2 p-2 rounded bg-black/40 border border-white/5 shadow-inner"&gt;</p>
+<p class="p1">                        &lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1">                          &lt;Calendar className="w-3 h-3 text-blue-400" /&gt;</p>
+<p class="p1">                          &lt;span className="text-[9px] font-mono tracking-tighter text-[#888]"&gt;</p>
+<p class="p1">                            &lt;span className="font-bold uppercase text-[8px] mr-1"&gt;{isAlwaysOn ? 'Trend Start:' : 'Start:'}&lt;/span&gt;</p>
+<p class="p1">                            {row.campaignStartDate || 'N/A'}</p>
+<p class="p1">                          &lt;/span&gt;</p>
+<p class="p1">                        &lt;/div&gt;</p>
+<p class="p1">                        &lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1">                          &lt;Calendar className="w-3 h-3 text-amber-400" /&gt;</p>
+<p class="p1">                          &lt;span className="text-[9px] font-mono tracking-tighter text-[#888]"&gt;</p>
+<p class="p1">                            &lt;span className="font-bold uppercase text-[8px] mr-1"&gt;{isAlwaysOn ? 'Trend End:' : 'End:'}&lt;/span&gt;</p>
+<p class="p1">                            {row.campaignEndDate || 'Active'}</p>
+<p class="p1">                          &lt;/span&gt;</p>
+<p class="p1">                        &lt;/div&gt;</p>
+<p class="p1">                        &lt;div className="flex items-center gap-2 mt-1"&gt;</p>
+<p class="p1">                          &lt;Clock className="w-3 h-3 text-emerald-400" /&gt;</p>
+<p class="p1">                          &lt;span className="text-[9px] font-bold tracking-tighter uppercase text-emerald-400"&gt;</p>
+<p class="p1">                            {isAlwaysOn ? 'Trend Days Live:' : 'Days Live:'} {daysLive}</p>
+<p class="p1">                          &lt;/span&gt;</p>
+<p class="p1">                        &lt;/div&gt;</p>
+<p class="p1">                      &lt;/div&gt;</p>
+<p class="p1">                    )}</p>
+<p class="p1">                    {isAnchorRow &amp;&amp; isCampaignView &amp;&amp; (</p>
+<p class="p1">                      &lt;span className="text-[9px] uppercase tracking-widest text-blue-500 font-black mt-1 italic"&gt;Reference Baseline&lt;/span&gt;</p>
+<p class="p1">                    )}</p>
+<p class="p1">                  &lt;/div&gt;</p>
+<p class="p1">                &lt;/td&gt;</p>
+<p class="p1">                {GENDERS_KEYS.map((g) =&gt; (</p>
+<p class="p1">                  &lt;React.Fragment key={g}&gt;</p>
+<p class="p1">                    {activeAges.map((a, ai) =&gt; (</p>
+<p class="p1">                      &lt;React.Fragment key={a}&gt;</p>
+<p class="p1">                        {activeMetrics.map((m) =&gt; {</p>
+<p class="p1">                          const node = row.metrics[m][g][a];</p>
+<p class="p1">                          const isEnd = ai === activeAges.length - 1 &amp;&amp; activeMetrics.indexOf(m) === activeMetrics.length - 1;</p>
+<p class="p1">                          let style = "text-slate-500 font-medium", bg = "";</p>
+<p class="p1">                          const showPaused = node.isPaused &amp;&amp; !isAnchorRow;</p>
+<p class="p2"><br></p>
+<p class="p1">                          if (showPaused) {</p>
+<p class="p1">                            style = "text-[#808080] font-bold";</p>
+<p class="p1">                            bg = "bg-[#1a1a1a]";</p>
+<p class="p1">                          }</p>
+<p class="p1">                          else if (node.sig === -1) { style = "text-red-500 font-bold"; bg = "bg-red-500/10"; }</p>
+<p class="p1">                          else if (node.sig === 1) { style = "text-emerald-500 font-bold"; bg = "bg-emerald-500/10"; }</p>
+<p class="p1">                          else if (node.v !== 0) { style = "text-slate-100 font-bold"; }</p>
+<p class="p2"><br></p>
+<p class="p1">                          return (</p>
+<p class="p1">                            &lt;td key={m} className={`py-5 px-3 font-mono text-[13px] tabular-nums ${style} ${bg} ${isEnd &amp;&amp; GENDERS_KEYS.indexOf(g) &lt; GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'}`}&gt;</p>
+<p class="p1">                              &lt;div className="flex flex-col items-center text-center"&gt;</p>
+<p class="p1">                                {showPaused ? (</p>
+<p class="p1">                                  &lt;&gt;</p>
+<p class="p1">                                    &lt;span className="leading-none uppercase"&gt;Paused&lt;/span&gt;</p>
+<p class="p1">                                    &lt;span className="text-[7px] opacity-60 font-sans tracking-tight block mt-0.5 font-normal leading-none uppercase italic"&gt;</p>
+<p class="p1">                                      {node.launchDate || 'No Data'}</p>
+<p class="p1">                                    &lt;/span&gt;</p>
+<p class="p1">                                  &lt;/&gt;</p>
+<p class="p1">                                ) : (</p>
+<p class="p1">                                  &lt;&gt;</p>
+<p class="p1">                                    &lt;span&gt;</p>
+<p class="p1">                                      {m === 'Impressions' </p>
+<p class="p1">                                        ? formatCompactNumber(node.v)</p>
+<p class="p1">                                        : (node.v === 0 ? '0.00' : (node.v &gt; 0 ? `+${node.v.toFixed(2)}` : `${node.v.toFixed(2)}`))}</p>
+<p class="p1">                                    &lt;/span&gt;</p>
+<p class="p1">                                    {node.abs !== 0 &amp;&amp; m !== 'Impressions' &amp;&amp; (</p>
+<p class="p1">                                      &lt;span className="text-[9px] opacity-50 font-sans tracking-tighter block mt-0.5 font-normal leading-none"&gt;</p>
+<p class="p1">                                        ({node.abs &gt; 0 ? `+${Math.round(node.abs).toLocaleString()}` : Math.round(node.abs).toLocaleString()})</p>
+<p class="p1">                                      &lt;/span&gt;</p>
+<p class="p1">                                    )}</p>
+<p class="p1">                                  &lt;/&gt;</p>
+<p class="p1">                                )}</p>
+<p class="p1">                              &lt;/div&gt;</p>
+<p class="p1">                            &lt;/td&gt;</p>
+<p class="p1">                          );</p>
+<p class="p1">                        })}</p>
+<p class="p1">                      &lt;/React.Fragment&gt;</p>
+<p class="p1">                    ))}</p>
+<p class="p1">                  &lt;/React.Fragment&gt;</p>
+<p class="p1">                ))}</p>
+<p class="p1">              &lt;/tr&gt;</p>
+<p class="p1">            );</p>
+<p class="p1">          })}</p>
+<p class="p1">        &lt;/tbody&gt;</p>
+<p class="p1">      &lt;/table&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  );</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">const OKRAndRecsView = ({ globalData, regionalData, latestDate }) =&gt; {</p>
+<p class="p1">  const [editingId, setEditingId] = useState(null);</p>
+<p class="p1">  const [editedRows, setEditedRows] = useState({});</p>
+<p class="p1">  const [manualPointers, setManualPointers] = useState([]);</p>
+<p class="p1">  const [isAddingManual, setIsAddingManual] = useState(false);</p>
+<p class="p1">  const [deletedRowIds, setDeletedRowIds] = useState(new Set());</p>
+<p class="p1">  const [copyFeedback, setCopyFeedback] = useState(null);</p>
+<p class="p1">  const [newManualForm, setNewManualForm] = useState({ country: 'APAC', campaign: '', age: 'GenPop', gender: 'GenPop', recommendation: 'MAINTAIN', justification: '' });</p>
+<p class="p2"><br></p>
+<p class="p1">  const showFeedback = (msg) =&gt; { setCopyFeedback(msg); setTimeout(() =&gt; setCopyFeedback(null), 2000); };</p>
+<p class="p1">  const daysLeft = useMemo(() =&gt; {</p>
+<p class="p1">    if (!latestDate) return "TBD";</p>
+<p class="p1">    const endQ = new Date("2026-03-31");</p>
+<p class="p1">    const current = new Date(latestDate);</p>
+<p class="p1">    const diffTime = Math.ceil((endQ - current) / (1000 * 60 * 60 * 24));</p>
+<p class="p1">    return diffTime &gt; 0 ? diffTime : 0;</p>
+<p class="p1">  }, [latestDate]);</p>
+<p class="p2"><br></p>
+<p class="p1">  const okrStats = useMemo(() =&gt; {</p>
+<p class="p1">    return ['APAC', 'India', 'Indonesia', 'Japan', 'South Korea', 'AUNZ'].map(mName =&gt; {</p>
+<p class="p1">      const record = globalData.find(d =&gt; eq(d.country, mName) || eq(d.country, MARKET_KEYS[mName]));</p>
+<p class="p1">      const actual = record?.metrics?.['DAU-SCT']?.total?.total?.v || 0;</p>
+<p class="p1">      const target = OKR_TARGETS[mName.toUpperCase()] || 1.00;</p>
+<p class="p1">      const perfIndex = target &gt; 0 ? (actual / target) * 100 : 0;</p>
+<p class="p1">      return { market: mName.toUpperCase(), actual, target, perfIndex, isOffline: !record };</p>
+<p class="p1">    });</p>
+<p class="p1">  }, [globalData]);</p>
+<p class="p2"><br></p>
+<p class="p1">  const recommendationRows = useMemo(() =&gt; {</p>
+<p class="p1">    const tableData = [];</p>
+<p class="p1">    MARKET_SEGMENTS.forEach(market =&gt; {</p>
+<p class="p1">      const allCampsInMarket = regionalData[market] || [];</p>
+<p class="p1">      allCampsInMarket.forEach((camp, ci) =&gt; {</p>
+<p class="p1">        if (isCampaignEnded(camp.optimisationEndDate, camp.campaignEndDate)) return;</p>
+<p class="p1">        const metrics = camp.metrics?.['DAU-SCT'] || {};</p>
+<p class="p1">        if (metrics.total?.total?.isPaused) return;</p>
+<p class="p2"><br></p>
+<p class="p1">        const isNeg = (g, a) =&gt; (metrics[g]?.[a]?.v || 0) &lt; -0.0001 &amp;&amp; !metrics[g]?.[a]?.isPaused;</p>
+<p class="p1">        const isPosSig = (g, a) =&gt; (metrics[g]?.[a]?.sig || 0) === 1 &amp;&amp; !metrics[g]?.[a]?.isPaused;</p>
+<p class="p2"><br></p>
+<p class="p1">        const mKey = MARKET_KEYS[market] || market.toUpperCase();</p>
+<p class="p1">        const aoScalingRestricted = ['SHELF', 'SSC', 'UTS', 'MVR'];</p>
+<p class="p1">        </p>
+<p class="p1">        let isAO = false;</p>
+<p class="p1">        const currentCampaignSuper = superClean(camp.country);</p>
+<p class="p1">        for (const cat of aoScalingRestricted) {</p>
+<p class="p1">          if (cat === 'UTS' &amp;&amp; currentCampaignSuper.includes('UTSSFV')) continue;</p>
+<p class="p1">          if (currentCampaignSuper.includes(superClean(cat))) { isAO = true; break; }</p>
+<p class="p1">        }</p>
+<p class="p2"><br></p>
+<p class="p1">        const gpNode = metrics.total?.total || { v: 0, sig: 0 };</p>
+<p class="p1">        if (!isAO &amp;&amp; gpNode.sig === 1 &amp;&amp; gpNode.v &gt; 0.001) {</p>
+<p class="p1">          tableData.push({ id: `CAMP_${market}_${ci}_SC`, country: mKey, campaign: camp.country, age: "GenPop", gender: "GenPop", recommendation: "SCALE", justification: `${mKey} ${camp.country} - Scale GenPop: Stat-sig positive lift (+${gpNode.v.toFixed(2)}%) observed.` });</p>
+<p class="p1">        }</p>
+<p class="p2"><br></p>
+<p class="p1">        const getPausedAges = (gK) =&gt; {</p>
+<p class="p1">          let dirs = [];</p>
+<p class="p1">          if (isNeg(gK, '18-24') &amp;&amp; isNeg(gK, '25-34') &amp;&amp; isNeg(gK, '35+')) return ['total'];</p>
+<p class="p1">          if (isNeg(gK, '18-24') &amp;&amp; isNeg(gK, '25-34')) dirs.push('18-34');</p>
+<p class="p1">          else { if (isNeg(gK, '18-24')) dirs.push('18-24'); if (isNeg(gK, '25-34')) dirs.push('25-34'); }</p>
+<p class="p1">          if (isNeg(gK, '35+')) dirs.push('35+');</p>
+<p class="p1">          return dirs;</p>
+<p class="p1">        };</p>
+<p class="p2"><br></p>
+<p class="p1">        const common = getPausedAges('male').filter(a =&gt; getPausedAges('female').includes(a));</p>
+<p class="p1">        const maleUnq = getPausedAges('male').filter(a =&gt; !common.includes(a));</p>
+<p class="p1">        const femaleUnq = getPausedAges('female').filter(a =&gt; !common.includes(a));</p>
+<p class="p2"><br></p>
+<p class="p1">        const addPause = (gK, aK, tag) =&gt; {</p>
+<p class="p1">          const v = metrics[gK]?.[aK]?.v || 0;</p>
+<p class="p1">          tableData.push({ id: `CAMP_${market}_${ci}_P_${gK}_${aK}`, country: mKey, campaign: camp.country, age: aK === 'total' ? 'GenPop' : aK, gender: gK === 'total' ? 'GenPop' : gK.toUpperCase(), recommendation: "PAUSE", justification: `${mKey} ${camp.country} - Pause ${tag}${aK} given negative lift (${v.toFixed(2)}%)` });</p>
+<p class="p1">        };</p>
+<p class="p2"><br></p>
+<p class="p1">        common.forEach(a =&gt; addPause('total', a, 'G'));</p>
+<p class="p1">        maleUnq.forEach(a =&gt; addPause('male', a, 'M'));</p>
+<p class="p1">        femaleUnq.forEach(a =&gt; addPause('female', a, 'F'));</p>
+<p class="p1">        </p>
+<p class="p1">        if (!isAO) {</p>
+<p class="p1">          DEMO_PERMS.filter(d =&gt; d.g !== 'total').forEach(demo =&gt; {</p>
+<p class="p1">            if (isPosSig(demo.g, demo.a)) {</p>
+<p class="p1">              const v = metrics[demo.g]?.[demo.a]?.v || 0;</p>
+<p class="p1">              tableData.push({ id: `CAMP_${market}_${ci}_SC_${demo.g}_${demo.a}`, country: mKey, campaign: camp.country, age: demo.a === 'total' ? 'GenPop' : demo.a, gender: demo.g.toUpperCase(), recommendation: "SCALE", justification: `${mKey} ${camp.country} - Scale ${demo.g.charAt(0).toUpperCase()}${demo.a} given positive lift (+${v.toFixed(2)}%)` });</p>
+<p class="p1">            }</p>
+<p class="p1">          });</p>
+<p class="p1">        }</p>
+<p class="p1">      });</p>
+<p class="p1">    });</p>
+<p class="p1">    const merged = [...tableData, ...manualPointers].filter(r =&gt; !deletedRowIds.has(r.id));</p>
+<p class="p1">    return merged.map(r =&gt; editedRows[r.id] ? { ...r, ...editedRows[r.id] } : r);</p>
+<p class="p1">  }, [regionalData, manualPointers, deletedRowIds, editedRows]);</p>
+<p class="p2"><br></p>
+<p class="p1">  const handleAddNewManual = () =&gt; { if (!newManualForm.campaign) return; setManualPointers(p =&gt; [...p, { ...newManualForm, id: `MANUAL_${Date.now()}` }]); setIsAddingManual(false); setNewManualForm({ country: 'APAC', campaign: '', age: 'GenPop', gender: 'GenPop', recommendation: 'MAINTAIN', justification: '' }); };</p>
+<p class="p2"><br></p>
+<p class="p1">  return (</p>
+<p class="p1">    &lt;div className="w-full max-w-[1600px] mx-auto pb-32"&gt;</p>
+<p class="p1">      {copyFeedback &amp;&amp; &lt;div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-lg font-bold text-xs uppercase shadow-xl"&gt;{copyFeedback}&lt;/div&gt;}</p>
+<p class="p1">      &lt;div className="flex flex-col lg:flex-row justify-between lg:items-end mb-12 gap-8 border-b border-[#3a3a3a] pb-8"&gt;</p>
+<p class="p1">        &lt;div className="space-y-4"&gt;</p>
+<p class="p1">          &lt;h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight uppercase"&gt;Shorts OKR Performance&lt;/h1&gt;</p>
+<p class="p1">          &lt;div className="flex flex-wrap gap-10 pt-4"&gt;</p>
+<p class="p1">            &lt;div className="space-y-1"&gt;&lt;p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest"&gt;Quarter Start&lt;/p&gt;&lt;p className="text-lg font-bold text-white"&gt;2026-02-01&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1">            &lt;div className="space-y-1"&gt;&lt;p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest"&gt;Reporting Date&lt;/p&gt;&lt;p className="text-lg font-bold text-emerald-400"&gt;{latestDate || "Awaiting Data..."}&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1">            &lt;div className="space-y-1"&gt;&lt;p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest"&gt;Days Left&lt;/p&gt;&lt;p className="text-lg font-bold text-amber-400"&gt;{daysLeft} &lt;span className="text-[10px] text-[#808080] font-normal ml-1"&gt;remaining&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16"&gt;</p>
+<p class="p1">        {okrStats.map((stat, idx) =&gt; {</p>
+<p class="p1">          const cfg = getStatusConfig(stat.perfIndex, stat.isOffline);</p>
+<p class="p1">          return (</p>
+<p class="p1">            &lt;div key={idx} className={`relative ${cfg.cardBg} rounded-lg p-6 border border-[#3a3a3a] transition-all hover:border-[#555] shadow-sm`}&gt;</p>
+<p class="p1">              &lt;div className="flex justify-between items-start mb-6"&gt;&lt;h3 className="text-xl font-bold text-white uppercase"&gt;{stat.market}&lt;/h3&gt;{!stat.isOffline &amp;&amp; &lt;BarChart3 className={`w-5 h-5 ${cfg.color}`} /&gt;}&lt;/div&gt;</p>
+<p class="p1">              &lt;div className="flex items-baseline gap-2 mb-4"&gt;&lt;span className="text-3xl font-bold text-white"&gt;{(stat.perfIndex || 0).toFixed(1)}%&lt;/span&gt;&lt;span className="text-[9px] font-bold text-[#808080] uppercase tracking-tighter"&gt;INDEX&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div className="relative h-1.5 w-full bg-black rounded-full overflow-hidden mb-4"&gt;&lt;div className={`h-full ${cfg.accent} transition-all duration-1000`} style={{ width: `${Math.min(stat.perfIndex, 100)}%` }} /&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div className="flex justify-between pt-4 border-t border-[#3a3a3a] font-mono text-[10px]"&gt;</p>
+<p class="p1">                &lt;div className="text-[#808080] uppercase"&gt;Actual: &lt;span className="text-white"&gt;+{stat.actual.toFixed(2)}%&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">                &lt;div className="text-[#808080] uppercase"&gt;Target: &lt;span className="text-[#b0b0b0]"&gt;{stat.target.toFixed(2)}%&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          );</p>
+<p class="p1">        })}</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">      &lt;div className="space-y-8"&gt;</p>
+<p class="p1">        &lt;div className="flex flex-col sm:flex-row items-center justify-between gap-6"&gt;</p>
+<p class="p1">          &lt;div className="flex items-center gap-4"&gt;&lt;div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#3a3a3a]"&gt;&lt;Lightbulb className="w-6 h-6 text-amber-400" /&gt;&lt;/div&gt;&lt;div&gt;&lt;h2 className="text-2xl font-bold text-white uppercase"&gt;Strategic Guidance&lt;/h2&gt;&lt;p className="text-[#808080] text-xs uppercase tracking-widest mt-1 font-medium"&gt;Data-Driven Directives &amp; Overrides&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1">          &lt;div className="flex flex-wrap gap-3"&gt;</p>
+<p class="p1">            &lt;button onClick={() =&gt; setIsAddingManual(true)} className="flex items-center gap-2 bg-[#FF0000] text-white px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-red-500 shadow-lg transition-all active:scale-95"&gt;&lt;Plus className="w-4 h-4" /&gt; Add Pointer&lt;/button&gt;</p>
+<p class="p1">            &lt;button onClick={() =&gt; { if (recommendationRows.length === 0) return; const headers = "Market\tEntity\tAge\tGender\tDirective\tJustification"; const body = recommendationRows.map(r =&gt; `${r.country}\t${r.campaign}\t${r.age}\t${r.gender}\t${r.recommendation}\t${r.justification}`).join('\n'); copyToClipboard(`${headers}\n${body}`); showFeedback("Matrix Copied for Sheets"); }} className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-[#e0e0e0] shadow-lg transition-all active:scale-95"&gt;&lt;Copy className="w-4 h-4" /&gt; Copy All&lt;/button&gt;</p>
+<p class="p1">            &lt;button onClick={() =&gt; { setDeletedRowIds(new Set()); setEditedRows({}); setManualPointers([]); showFeedback("Matrix Restored"); }} className="flex items-center gap-2 bg-[#1a1a1a] text-[#808080] px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:text-white transition-all border border-[#3a3a3a] active:scale-95"&gt;&lt;RotateCcw className="w-4 h-4" /&gt; Restore&lt;/button&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">        {isAddingManual &amp;&amp; (</p>
+<p class="p1">          &lt;div className="bg-[#1a1a1a] border border-[#FF0000]/30 rounded-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200"&gt;</p>
+<p class="p1">            &lt;div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"&gt;</p>
+<p class="p1">              &lt;div&gt;&lt;label className="text-[9px] font-bold text-[#808080] uppercase block mb-2"&gt;Market&lt;/label&gt;&lt;input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold uppercase text-white" value={newManualForm.country} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, country: e.target.value.toUpperCase()}))} /&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div&gt;&lt;label className="text-[9px] font-bold text-[#808080] uppercase block mb-2"&gt;Entity&lt;/label&gt;&lt;input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" placeholder="e.g. Veo" value={newManualForm.campaign} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, campaign: e.target.value}))} /&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div&gt;&lt;label className="text-[9px] font-bold text-[#808080] uppercase block mb-2"&gt;Age&lt;/label&gt;&lt;input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value={newManualForm.age} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, age: e.target.value}))} /&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div&gt;&lt;label className="text-[9px] font-bold text-[#808080] uppercase block mb-2"&gt;Gender&lt;/label&gt;&lt;input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value={newManualForm.gender} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, gender: e.target.value}))} /&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div&gt;&lt;label className="text-[9px] font-bold text-[#808080] uppercase block mb-2"&gt;Directive&lt;/label&gt;</p>
+<p class="p1">                &lt;select className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value={newManualForm.recommendation} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, recommendation: e.target.value}))}&gt;</p>
+<p class="p1">                  &lt;option value="MAINTAIN"&gt;MAINTAIN&lt;/option&gt;&lt;option value="SCALE"&gt;SCALE&lt;/option&gt;&lt;option value="PAUSE"&gt;PAUSE&lt;/option&gt;</p>
+<p class="p1">                &lt;/select&gt;</p>
+<p class="p1">              &lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">            &lt;textarea className="w-full h-24 bg-black border border-[#3a3a3a] rounded-lg p-3 text-[11px] text-[#b0b0b0] mb-4 resize-none" value={newManualForm.justification} onChange={e =&gt; setNewManualForm(p =&gt; ({...p, justification: e.target.value}))} placeholder="Context..." /&gt;</p>
+<p class="p1">            &lt;div className="flex justify-end gap-3"&gt;</p>
+<p class="p1">              &lt;button type="button" onClick={() =&gt; setIsAddingManual(false)} className="bg-[#1a1a1a] text-[#808080] px-5 py-2.5 rounded-lg font-bold text-[10px] uppercase border border-[#3a3a3a]"&gt;Cancel&lt;/button&gt;</p>
+<p class="p1">              &lt;button onClick={handleAddNewManual} className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-[10px] uppercase shadow-lg"&gt;Confirm&lt;/button&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          &lt;/div&gt;</p>
+<p class="p1">        )}</p>
+<p class="p2"><br></p>
+<p class="p1">        &lt;div className="bg-[#1a1a1a] rounded-lg border border-[#3a3a3a] overflow-hidden overflow-x-auto shadow-sm"&gt;</p>
+<p class="p1">          &lt;table className="w-full border-collapse text-[11px]"&gt;</p>
+<p class="p1">            &lt;thead&gt;</p>
+<p class="p1">              &lt;tr className="bg-[#111] text-[#808080] uppercase tracking-widest border-b border-[#3a3a3a] font-bold"&gt;</p>
+<p class="p1">                &lt;th className="px-8 py-6 text-left"&gt;Market&lt;/th&gt;&lt;th className="px-8 py-6 text-left"&gt;Entity&lt;/th&gt;&lt;th className="px-8 py-6 text-center"&gt;Age&lt;/th&gt;&lt;th className="px-8 py-6 text-center"&gt;Gender&lt;/th&gt;&lt;th className="px-8 py-6 text-left"&gt;Directive&lt;/th&gt;&lt;th className="px-8 py-6 text-left"&gt;Justification&lt;/th&gt;&lt;th className="px-8 py-6 text-center"&gt;Action&lt;/th&gt;</p>
+<p class="p1">              &lt;/tr&gt;</p>
+<p class="p1">            &lt;/thead&gt;</p>
+<p class="p1">            &lt;tbody className="divide-y divide-white/5"&gt;</p>
+<p class="p1">              {recommendationRows.map(row =&gt; (</p>
+<p class="p1">                &lt;tr key={row.id} className={`hover:bg-white/[0.02] group/row transition-colors ${row.recommendation === 'PAUSE' ? 'bg-red-500/[0.03]' : ''}`}&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 font-bold uppercase text-blue-400"&gt;{row.country}&lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 font-bold text-[#e0e0e0] truncate max-w-[200px]"&gt;{row.campaign}&lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 text-center text-[#b0b0b0] uppercase font-mono"&gt;{row.age}&lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 text-center text-[#b0b0b0] uppercase font-mono"&gt;{row.gender}&lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 font-bold"&gt;</p>
+<p class="p1">                    {editingId === row.id ? (</p>
+<p class="p1">                      &lt;select className="bg-black/60 border border-white/10 rounded-lg p-2 text-[10px] text-white" value={editedRows[row.id]?.recommendation || row.recommendation} onChange={e =&gt; setEditedRows(p =&gt; ({...p, [row.id]: {...(p[row.id] || row), recommendation: e.target.value}}))}&gt;</p>
+<p class="p1">                        &lt;option value="MAINTAIN"&gt;MAINTAIN&lt;/option&gt;&lt;option value="SCALE"&gt;SCALE&lt;/option&gt;&lt;option value="PAUSE"&gt;PAUSE&lt;/option&gt;</p>
+<p class="p1">                      &lt;/select&gt;</p>
+<p class="p1">                    ) : (</p>
+<p class="p1">                      &lt;span className={row.recommendation === 'PAUSE' ? 'text-red-400' : (row.recommendation === 'SCALE' ? 'text-emerald-400' : 'text-amber-400')}&gt;{row.recommendation}&lt;/span&gt;</p>
+<p class="p1">                    )}</p>
+<p class="p1">                  &lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-4 text-[#808080] max-w-[300px] leading-relaxed"&gt;</p>
+<p class="p1">                    {editingId === row.id ? (</p>
+<p class="p1">                      &lt;textarea className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-[10px] min-h-[60px] resize-none" value={editedRows[row.id]?.justification || row.justification} onChange={e =&gt; setEditedRows(p =&gt; ({...p, [row.id]: {...(p[row.id] || row), justification: e.target.value}}))} /&gt;</p>
+<p class="p1">                    ) : row.justification}</p>
+<p class="p1">                  &lt;/td&gt;</p>
+<p class="p1">                  &lt;td className="px-8 py-5 text-center"&gt;</p>
+<p class="p1">                    &lt;div className="flex items-center justify-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity"&gt;</p>
+<p class="p1">                      {editingId === row.id ? (</p>
+<p class="p1">                        &lt;button onClick={() =&gt; setEditingId(null)} className="p-2.5 rounded-xl bg-emerald-600 text-white"&gt;&lt;Save className="w-4 h-4" /&gt;&lt;/button&gt;</p>
+<p class="p1">                      ) : (</p>
+<p class="p1">                        &lt;button onClick={() =&gt; setEditingId(row.id)} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white"&gt;&lt;Edit2 className="w-4 h-4" /&gt;&lt;/button&gt;</p>
+<p class="p1">                      )}</p>
+<p class="p1">                      &lt;button onClick={() =&gt; { copyToClipboard(`${row.country}\t${row.campaign}\t${row.age}\t${row.gender}\t${row.recommendation}\t${row.justification}`); showFeedback("Row Copied"); }} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-emerald-400"&gt;&lt;Copy className="w-4 h-4" /&gt;&lt;/button&gt;</p>
+<p class="p1">                      &lt;button onClick={() =&gt; setDeletedRowIds(p =&gt; new Set([...p, row.id]))} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-red-500"&gt;&lt;Trash2 className="w-4 h-4" /&gt;&lt;/button&gt;</p>
+<p class="p1">                    &lt;/div&gt;</p>
+<p class="p1">                  &lt;/td&gt;</p>
+<p class="p1">                &lt;/tr&gt;</p>
+<p class="p1">              ))}</p>
+<p class="p1">            &lt;/tbody&gt;</p>
+<p class="p1">          &lt;/table&gt;</p>
+<p class="p1">          {recommendationRows.length === 0 &amp;&amp; &lt;div className="p-20 text-center text-[#555] font-bold uppercase tracking-widest text-[10px]"&gt;Matrix Empty&lt;/div&gt;}</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  );</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">// --- MAIN APPLICATION COMPONENT ---</p>
+<p class="p2"><br></p>
+<p class="p1">const App = () =&gt; {</p>
+<p class="p1">  const [isAnalyzed, setIsAnalyzed] = useState(false);</p>
+<p class="p1">  const [isAnalyzing, setIsAnalyzing] = useState(false);</p>
+<p class="p1">  const [activeTab, setActiveTab] = useState('OKR');</p>
+<p class="p1">  const [isSidebarOpen, setIsSidebarOpen] = useState(true);</p>
+<p class="p1">  const [activeMetrics, setActiveMetrics] = useState(['DAU-SCT']);</p>
+<p class="p1">  const [isCampaignTypeExpanded, setIsCampaignTypeExpanded] = useState(false);</p>
+<p class="p1">  const [activeMarketSubTab, setActiveMarketSubTab] = useState('India');</p>
+<p class="p1">  const [latestGlobalDate, setLatestGlobalDate] = useState(null);</p>
+<p class="p1">  const [user, setUser] = useState(null);</p>
+<p class="p2"><br></p>
+<p class="p1">  const [tabMarketFilter, setTabMarketFilter] = useState({ 'ScaledCreation': 'India', 'Trends': 'India', 'CultMo': 'India', 'ArtMo': 'India', 'GenAI Hub': 'India', 'AlwaysOn': 'India' });</p>
+<p class="p1">  const [subTabFilter, setSubTabFilter] = useState({ 'ScaledCreation': '', 'Trends': '', 'CultMo': '', 'ArtMo': '', 'GenAI Hub': '', 'AlwaysOn': '' });</p>
+<p class="p1">  const [subSubTabFilter, setSubSubTabFilter] = useState({ 'ScaledCreation': '', 'Trends': '', 'CultMo': '', 'ArtMo': '', 'GenAI Hub': '', 'AlwaysOn': '' });</p>
+<p class="p2"><br></p>
+<p class="p1">  const [globalData, setGlobalData] = useState([]);</p>
+<p class="p1">  const [regionalData, setRegionalData] = useState({});</p>
+<p class="p1">  const [campaignHubData, setCampaignHubData] = useState({});</p>
+<p class="p2"><br></p>
+<p class="p1">  const [uploadedFiles, setUploadedFiles] = useState({</p>
+<p class="p1">    pct: { global: null, countryHB: {}, alwaysOn: {} },</p>
+<p class="p1">    abs: { global: null, countryHB: {}, alwaysOn: {} },</p>
+<p class="p1">    shared: { campaignInfo: null, pauseRelive: null },</p>
+<p class="p1">    attribution: { impressions: null }</p>
+<p class="p1">  });</p>
+<p class="p2"><br></p>
+<p class="p1">  const [memoryIndex, setMemoryIndex] = useState([]);</p>
+<p class="p1">  const [memoryStatus, setMemoryStatus] = useState('idle');</p>
+<p class="p2"><br></p>
+<p class="p1">  const firebaseConfig = useMemo(() =&gt; {</p>
+<p class="p1">    try {</p>
+<p class="p1">      return JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');</p>
+<p class="p1">    } catch { return {}; }</p>
+<p class="p1">  }, []);</p>
+<p class="p1">  const appId = typeof __app_id !== 'undefined' ? __app_id : 'shorts-brain-v2';</p>
+<p class="p2"><br></p>
+<p class="p1">  useEffect(() =&gt; {</p>
+<p class="p1">    if (!firebaseConfig.apiKey) return;</p>
+<p class="p1">    const app = initializeApp(firebaseConfig);</p>
+<p class="p1">    const auth = getAuth(app);</p>
+<p class="p1">    const db = getFirestore(app);</p>
+<p class="p1">    const initAuth = async () =&gt; {</p>
+<p class="p1">      if (typeof __initial_auth_token !== 'undefined' &amp;&amp; __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);</p>
+<p class="p1">      else await signInAnonymously(auth);</p>
+<p class="p1">    };</p>
+<p class="p1">    initAuth();</p>
+<p class="p1">    const unsubscribe = onAuthStateChanged(auth, setUser);</p>
+<p class="p1">    return () =&gt; unsubscribe();</p>
+<p class="p1">  }, [firebaseConfig]);</p>
+<p class="p2"><br></p>
+<p class="p1">  useEffect(() =&gt; {</p>
+<p class="p1">    if (!user) return;</p>
+<p class="p1">    const db = getFirestore();</p>
+<p class="p1">    const snapshotsCol = collection(db, 'artifacts', appId, 'public', 'data', 'snapshots');</p>
+<p class="p1">    const unsubscribe = onSnapshot(snapshotsCol, (snap) =&gt; {</p>
+<p class="p1">      const data = snap.docs.map(doc =&gt; ({ ...doc.data(), id: doc.id }));</p>
+<p class="p1">      setMemoryIndex(data.sort((a, b) =&gt; b.timestamp - a.timestamp));</p>
+<p class="p1">    }, (err) =&gt; console.error(err));</p>
+<p class="p1">    return () =&gt; unsubscribe();</p>
+<p class="p1">  }, [user, appId]);</p>
+<p class="p2"><br></p>
+<p class="p1">  const saveSnapshotToCloud = async (snapshotData) =&gt; {</p>
+<p class="p1">    if (!user) return;</p>
+<p class="p1">    const db = getFirestore();</p>
+<p class="p1">    setMemoryStatus('saving');</p>
+<p class="p1">    try {</p>
+<p class="p1">      const snapId = `snap_${Date.now()}`;</p>
+<p class="p1">      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'snapshots', snapId);</p>
+<p class="p1">      await setDoc(docRef, { ...snapshotData, id: snapId, timestamp: Date.now(), weekId: getWeekId(snapshotData.reportingDate) });</p>
+<p class="p1">      setMemoryStatus('saved');</p>
+<p class="p1">      setTimeout(() =&gt; setMemoryStatus('idle'), 3000);</p>
+<p class="p1">    } catch { setMemoryStatus('error'); }</p>
+<p class="p1">  };</p>
+<p class="p2"><br></p>
+<p class="p1">  const startAnalysis = async () =&gt; {</p>
+<p class="p1">    setIsAnalyzing(true);</p>
+<p class="p1">    try {</p>
+<p class="p1">      const readFile = (f) =&gt; new Promise(res =&gt; { if (!f) res(""); const r = new FileReader(); r.onload = e =&gt; res(e.target.result); r.readAsText(f); });</p>
+<p class="p1">      let metaLookup = {};</p>
+<p class="p1">      if (uploadedFiles.shared.campaignInfo) {</p>
+<p class="p1">        const text = await readFile(uploadedFiles.shared.campaignInfo);</p>
+<p class="p1">        const lines = text.split(/\r?\n/).filter(l =&gt; l.trim() !== '');</p>
+<p class="p1">        if (lines.length &gt; 1) {</p>
+<p class="p1">          const hdrs = splitCSVLine(lines[0]);</p>
+<p class="p1">          const cIdx = findHeader(hdrs, ['Campaign', 'Campaign Name']), mktIdx = findHeader(hdrs, ['Market', 'Country']), tabIdx = findHeader(hdrs, ['Campaign Tabs', 'Tabs', 'Tab']), subTabIdx = findHeader(hdrs, ['Campaign Sub tabs', 'Sub tabs', 'Sub tab', 'Sub category']), ssTabIdx = findHeader(hdrs, ['Campaign Hub Sub Sub tabs', 'Sub sub tabs']), sIdx = findHeader(hdrs, ['Start Date']), eIdx = findHeader(hdrs, ['End Date']), oIdx = findHeader(hdrs, ['Optimisation End Date']);</p>
+<p class="p1">          lines.slice(1).forEach(line =&gt; {</p>
+<p class="p1">            const cols = splitCSVLine(line);</p>
+<p class="p1">            const name = cleanStr(cols[cIdx]);</p>
+<p class="p1">            if (name) {</p>
+<p class="p1">              const rawMkt = cleanStr(cols[mktIdx]).toUpperCase();</p>
+<p class="p1">              const resMkt = MARKET_KEYS_REV[rawMkt] || MARKET_SEGMENTS.find(s =&gt; eq(s, rawMkt)) || 'India';</p>
+<p class="p1">              if (!metaLookup[superClean(resMkt)]) metaLookup[superClean(resMkt)] = {};</p>
+<p class="p1">              metaLookup[superClean(resMkt)][superClean(name)] = { market: resMkt, tab: cleanStr(cols[tabIdx]), subTab: cleanStr(cols[subTabIdx]), subSubTab: cleanStr(cols[ssTabIdx]), campaignStartDate: cleanStr(cols[sIdx]), campaignEndDate: cleanStr(cols[eIdx]), optimisationEndDate: cleanStr(cols[oIdx]) };</p>
+<p class="p1">            }</p>
+<p class="p1">          });</p>
+<p class="p1">        }</p>
+<p class="p1">      }</p>
+<p class="p1">      let instructionMap = {};</p>
+<p class="p1">      if (uploadedFiles.shared.pauseRelive) {</p>
+<p class="p1">        const text = await readFile(uploadedFiles.shared.pauseRelive);</p>
+<p class="p1">        const lines = text.split(/\r?\n/).filter(l =&gt; l.trim() !== '');</p>
+<p class="p1">        if (lines.length &gt; 1) {</p>
+<p class="p1">          const hdrs = splitCSVLine(lines[0]);</p>
+<p class="p1">          const cIdx = findHeader(hdrs, ['Campaign', 'Campaign Name']), mIdx = findHeader(hdrs, ['Market', 'Country']), aIdx = findHeader(hdrs, ['Age', 'Age Group', 'Slice']), gIdx = findHeader(hdrs, ['Gender']), iIdx = findHeader(hdrs, ['Instruction', 'Action']), dIdx = findHeader(hdrs, ['Launch Date', 'Date']);</p>
+<p class="p1">          lines.slice(1).forEach(l =&gt; {</p>
+<p class="p1">            const cols = splitCSVLine(l);</p>
+<p class="p1">            const mCode = resolveMarketCode(cols[mIdx]);</p>
+<p class="p1">            const cKey = superClean(cols[cIdx]);</p>
+<p class="p1">            let aK = cleanStr(cols[aIdx]).toUpperCase();</p>
+<p class="p1">            aK = (aK === 'GENPOP' || aK === 'TOTAL' || !aK) ? 'total' : aK.toLowerCase().replace(/[^a-z0-9+]/g, '');</p>
+<p class="p1">            let gK = cleanStr(cols[gIdx]).toUpperCase();</p>
+<p class="p1">            gK = (gK === 'GENPOP' || gK === 'TOTAL' || !gK) ? 'total' : gK.toLowerCase();</p>
+<p class="p1">            if (cleanStr(cols[iIdx]).toUpperCase() === 'PAUSE') {</p>
+<p class="p1">              if (!instructionMap[mCode]) instructionMap[mCode] = {};</p>
+<p class="p1">              if (!instructionMap[mCode][cKey]) instructionMap[mCode][cKey] = {};</p>
+<p class="p1">              if (!instructionMap[mCode][cKey][gK]) instructionMap[mCode][cKey][gK] = {};</p>
+<p class="p1">              instructionMap[mCode][cKey][gK][aK] = cleanStr(cols[dIdx]);</p>
+<p class="p1">            }</p>
+<p class="p1">          });</p>
+<p class="p1">        }</p>
+<p class="p1">      }</p>
+<p class="p2"><br></p>
+<p class="p1">      const structTemp = {};</p>
+<p class="p1">      const route = (parsedMap, defaultMarket, forceTab = null, forceSub = null) =&gt; {</p>
+<p class="p1">        Object.values(parsedMap).forEach(row =&gt; {</p>
+<p class="p1">          const meta = row.meta || {};</p>
+<p class="p1">          let tabRaw = forceTab || cleanStr(meta.tab);</p>
+<p class="p1">          const child = CAMPAIGN_CHILDREN.find(c =&gt; eq(c.id, tabRaw) || eq(c.label, tabRaw));</p>
+<p class="p1">          const mkName = meta.market || defaultMarket || 'India';</p>
+<p class="p1">          const mCode = resolveMarketCode(mkName);</p>
+<p class="p1">          const cK = superClean(row.country);</p>
+<p class="p1">          </p>
+<p class="p1">          let mInstr = instructionMap[mCode]?.[cK];</p>
+<p class="p1">          if (!mInstr &amp;&amp; meta.subSubTab) mInstr = instructionMap[mCode]?.[superClean(meta.subSubTab)];</p>
+<p class="p1">          if (!mInstr &amp;&amp; meta.subTab) mInstr = instructionMap[mCode]?.[superClean(meta.subTab)];</p>
+<p class="p1">          if (!mInstr &amp;&amp; forceSub) mInstr = instructionMap[mCode]?.[superClean(forceSub)];</p>
+<p class="p1">          </p>
+<p class="p1">          const hasEnded = isCampaignEnded(row.optimisationEndDate, row.campaignEndDate);</p>
+<p class="p2"><br></p>
+<p class="p1">          M_TYPES.forEach(m =&gt; {</p>
+<p class="p1">            GENDERS_KEYS.forEach(g =&gt; {</p>
+<p class="p1">              AGE_BUCKETS.forEach(a =&gt; {</p>
+<p class="p1">                if (defaultMarket === 'APAC' &amp;&amp; !meta.market) return;</p>
+<p class="p1">                if (hasEnded) { row.metrics[m][g][a].isPaused = true; row.metrics[m][g][a].launchDate = row.campaignEndDate || 'Ended'; return; }</p>
+<p class="p1">                if (mInstr) {</p>
+<p class="p1">                  const sA = a.replace(/[^a-z0-9+]/g, ''), pA = (sA === '1824' || sA === '2534') ? '1834' : null;</p>
+<p class="p1">                  const ks = [[g, sA], pA ? [g, pA] : null, [g, 'total'], ['total', sA], pA ? ['total', pA] : null, ['total', 'total']].filter(Boolean);</p>
+<p class="p1">                  for (const [tg, ta] of ks) { if (mInstr[tg]?.[ta]) { row.metrics[m][g][a].isPaused = true; row.metrics[m][g][a].launchDate = mInstr[tg][ta]; break; } }</p>
+<p class="p1">                }</p>
+<p class="p1">              });</p>
+<p class="p1">            });</p>
+<p class="p1">          });</p>
+<p class="p1">          if (child) {</p>
+<p class="p1">            const sub = forceSub || cleanStr(meta.subTab) || 'Generic', ss = cleanStr(meta.subSubTab) || 'Default';</p>
+<p class="p1">            if (!structTemp[child.id]) structTemp[child.id] = {};</p>
+<p class="p1">            if (!structTemp[child.id][mkName]) structTemp[child.id][mkName] = {};</p>
+<p class="p1">            if (!structTemp[child.id][mkName][sub]) structTemp[child.id][mkName][sub] = {};</p>
+<p class="p1">            if (!structTemp[child.id][mkName][sub][ss]) structTemp[child.id][mkName][sub][ss] = {};</p>
+<p class="p1">            structTemp[child.id][mkName][sub][ss][cK] = row;</p>
+<p class="p1">          }</p>
+<p class="p1">        });</p>
+<p class="p1">      };</p>
+<p class="p2"><br></p>
+<p class="p1">      let dGlobalD = null;</p>
+<p class="p1">      const process = async (st, isAb = false) =&gt; {</p>
+<p class="p1">        const s = uploadedFiles[st];</p>
+<p class="p1">        let sgd = {};</p>
+<p class="p1">        if (s.global) {</p>
+<p class="p1">          const text = await readFile(s.global);</p>
+<p class="p1">          if (st === 'pct') {</p>
+<p class="p1">            const lines = text.split(/\r?\n/).filter(l =&gt; l.trim() !== '');</p>
+<p class="p1">            const h = splitCSVLine(lines[0]);</p>
+<p class="p1">            const di = findHeader(h, ['Date', 'Reporting Date']);</p>
+<p class="p1">            if (di !== -1) { let md = null; lines.slice(1).forEach(l =&gt; { const d = robustParseDate(splitCSVLine(l)[di]); if (d &amp;&amp; (!md || d &gt; md)) md = d; }); dGlobalD = md; setLatestGlobalDate(md); }</p>
+<p class="p1">          }</p>
+<p class="p1">          sgd = parseCSVData(text, {}, metaLookup, ['Country', 'Market', 'Campaign'], isAb, null);</p>
+<p class="p1">        }</p>
+<p class="p1">        const mh = {};</p>
+<p class="p1">        for (const m of MARKET_SEGMENTS) { if (s.countryHB[m]) mh[m] = parseCSVData(await readFile(s.countryHB[m]), {}, metaLookup, undefined, isAb, m); }</p>
+<p class="p1">        const ao = {};</p>
+<p class="p1">        for (const c of AO_CATEGORIES) { if (s.alwaysOn[c]) ao[c] = parseCSVData(await readFile(s.alwaysOn[c]), {}, metaLookup, undefined, isAb, null); }</p>
+<p class="p1">        return { sgd, mh, ao };</p>
+<p class="p1">      };</p>
+<p class="p2"><br></p>
+<p class="p1">      const pct = await process('pct', false), abs = await process('abs', true);</p>
+<p class="p1">      let imd = {};</p>
+<p class="p1">      if (uploadedFiles.attribution.impressions) imd = parseCSVData(await readFile(uploadedFiles.attribution.impressions), {}, metaLookup, ['Campaign', 'Entity', 'Market'], true, null);</p>
+<p class="p2"><br></p>
+<p class="p1">      const merge = (pm, am, im = {}) =&gt; {</p>
+<p class="p1">        const res = { ...pm };</p>
+<p class="p1">        Object.keys(am).forEach(k =&gt; { if (res[k]) M_TYPES.forEach(m =&gt; { if (m !== 'Impressions') GENDERS_KEYS.forEach(g =&gt; { AGE_BUCKETS.forEach(a =&gt; { if (am[k].metrics[m]) res[k].metrics[m][g][a].abs = am[k].metrics[m][g][a].abs; }); }); }); });</p>
+<p class="p1">        Object.keys(im).forEach(k =&gt; { if (res[k]) GENDERS_KEYS.forEach(g =&gt; { AGE_BUCKETS.forEach(a =&gt; { if (im[k].metrics['Impressions']) res[k].metrics['Impressions'][g][a].v = im[k].metrics['Impressions'][g][a].v; }); }); });</p>
+<p class="p1">        return res;</p>
+<p class="p1">      };</p>
+<p class="p2"><br></p>
+<p class="p1">      const mG = merge(pct.sgd, abs.sgd, imd);</p>
+<p class="p1">      route(mG, 'APAC');</p>
+<p class="p1">      const rM = {};</p>
+<p class="p1">      MARKET_SEGMENTS.forEach(m =&gt; {</p>
+<p class="p1">        const mm = merge(pct.mh[m] || {}, abs.mh[m] || {}, imd);</p>
+<p class="p1">        rM[m] = Object.values(mm).filter(r =&gt; r.meta &amp;&amp; (!r.meta.market || eq(r.meta.market, m)));</p>
+<p class="p1">        route(mm, m);</p>
+<p class="p1">      });</p>
+<p class="p1">      AO_CATEGORIES.forEach(c =&gt; route(merge(pct.ao[c] || {}, abs.ao[c] || {}, imd), null, 'AlwaysOn', c));</p>
+<p class="p2"><br></p>
+<p class="p1">      const fS = {};</p>
+<p class="p1">      Object.keys(structTemp).forEach(t =&gt; {</p>
+<p class="p1">        fS[t] = {};</p>
+<p class="p1">        Object.keys(structTemp[t]).forEach(mk =&gt; {</p>
+<p class="p1">          fS[t][mk] = {};</p>
+<p class="p1">          Object.keys(structTemp[t][mk]).forEach(sub =&gt; {</p>
+<p class="p1">            fS[t][mk][sub] = {};</p>
+<p class="p1">            Object.keys(structTemp[t][mk][sub]).forEach(ss =&gt; { fS[t][mk][sub][ss] = Object.values(structTemp[t][mk][sub][ss]); });</p>
+<p class="p1">          });</p>
+<p class="p1">        });</p>
+<p class="p1">      });</p>
+<p class="p2"><br></p>
+<p class="p1">      const arrG = Object.values(mG);</p>
+<p class="p1">      setGlobalData(arrG); setRegionalData(rM); setCampaignHubData(fS); setIsAnalyzed(true);</p>
+<p class="p1">      await saveSnapshotToCloud({ reportingDate: dGlobalD, globalData: arrG, regionalData: rM, campaignHubData: fS });</p>
+<p class="p1">    } catch (err) { console.error(err); } finally { setIsAnalyzing(false); }</p>
+<p class="p1">  };</p>
+<p class="p2"><br></p>
+<p class="p1">  const handleFileUpload = (s, t, f, k) =&gt; setUploadedFiles(prev =&gt; { </p>
+<p class="p1">    const upd = { ...prev[s] }; </p>
+<p class="p1">    if (t === 'countryHB' || t === 'alwaysOn') upd[t] = { ...upd[t], [k]: f }; </p>
+<p class="p1">    else upd[t] = f; </p>
+<p class="p1">    return { ...prev, [s]: upd }; </p>
+<p class="p1">  });</p>
+<p class="p2"><br></p>
+<p class="p1">  if (!isAnalyzed) return &lt;LandingPage uploadedFiles={uploadedFiles} handleFileUpload={handleFileUpload} startAnalysis={startAnalysis} isAnalyzing={isAnalyzing} /&gt;;</p>
+<p class="p2"><br></p>
+<p class="p1">  const allowed = activeTab === 'Global Hub' ? M_TYPES.filter(m =&gt; m !== 'Impressions') : M_TYPES;</p>
+<p class="p1">  const filteredMetrics = activeMetrics.filter(m =&gt; allowed.includes(m));</p>
+<p class="p2"><br></p>
+<p class="p1">  return (</p>
+<p class="p1">    &lt;div className="flex h-screen bg-black text-[#e0e0e0] overflow-hidden font-sans"&gt;</p>
+<p class="p1">      &lt;aside className={`${isSidebarOpen ? 'w-72' : 'w-20'} transition-all duration-300 bg-[#111] border-r border-[#2a2a2a] flex flex-col z-50`}&gt;</p>
+<p class="p1">        &lt;div className="p-6 flex items-center gap-3 mb-6 shrink-0 border-b border-[#2a2a2a]"&gt;</p>
+<p class="p1">          &lt;div className="bg-[#FF0000] p-2 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/20"&gt;&lt;Brain className="text-white w-5 h-5" /&gt;&lt;/div&gt;</p>
+<p class="p1">          {isSidebarOpen &amp;&amp; &lt;div&gt;&lt;h2 className="text-lg font-bold tracking-tight"&gt;BRAIN &lt;span className="text-[#FF0000]"&gt;2.0&lt;/span&gt;&lt;/h2&gt;&lt;p className="text-[8px] font-bold uppercase text-[#555] tracking-widest"&gt;APAC Marketing Hub&lt;/p&gt;&lt;/div&gt;}</p>
+<p class="p1">        &lt;/div&gt;</p>
+<p class="p1">        &lt;nav className="flex-1 px-4 space-y-1 overflow-y-auto"&gt;</p>
+<p class="p1">          {NAV_ITEMS.map(item =&gt; {</p>
+<p class="p1">            const Icon = item.icon;</p>
+<p class="p1">            return (</p>
+<p class="p1">              &lt;button key={item.id} type="button" onClick={() =&gt; { if (item.id === 'Upload') setIsAnalyzed(false); else setActiveTab(item.id); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${activeTab === item.id ? 'bg-[#FF0000]/10 text-[#FF0000]' : 'text-[#808080] hover:text-white'}`}&gt;</p>
+<p class="p1">                &lt;Icon className="w-5 h-5 shrink-0" /&gt;{isSidebarOpen &amp;&amp; &lt;span className="text-[11px] font-bold uppercase tracking-wider"&gt;{item.label}&lt;/span&gt;}</p>
+<p class="p1">              &lt;/button&gt;</p>
+<p class="p1">            );</p>
+<p class="p1">          })}</p>
+<p class="p1">          &lt;div className="my-4 border-t border-[#222]"&gt;&lt;/div&gt;</p>
+<p class="p1">          &lt;button type="button" onClick={() =&gt; setIsCampaignTypeExpanded(!isCampaignTypeExpanded)} className="w-full flex items-center justify-between p-3 rounded-xl text-[#808080] hover:text-white cursor-pointer"&gt;</p>
+<p class="p1">            &lt;div className="flex items-center gap-3"&gt;&lt;FolderKanban className="w-5 h-5 shrink-0" /&gt;{isSidebarOpen &amp;&amp; &lt;span className="text-[11px] font-bold uppercase tracking-widest"&gt;Campaign Hub&lt;/span&gt;}&lt;/div&gt;</p>
+<p class="p1">            {isSidebarOpen &amp;&amp; (isCampaignTypeExpanded ? &lt;ChevronUp className="w-4 h-4" /&gt; : &lt;ChevronDown className="w-4 h-4" /&gt;)}</p>
+<p class="p1">          &lt;/button&gt;</p>
+<p class="p1">          {isCampaignTypeExpanded &amp;&amp; isSidebarOpen &amp;&amp; (</p>
+<p class="p1">            &lt;div className="pl-4 space-y-1 animate-in slide-in-from-top-2 duration-300"&gt;</p>
+<p class="p1">              {CAMPAIGN_CHILDREN.map(child =&gt; {</p>
+<p class="p1">                const Icon = child.icon;</p>
+<p class="p1">                return (</p>
+<p class="p1">                  &lt;button key={child.id} type="button" onClick={() =&gt; setActiveTab(child.id)} className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer ${activeTab === child.id ? 'bg-[#FF0000]/10 text-[#FF0000]' : 'text-[#555] hover:bg-white/5 hover:text-white'}`}&gt;</p>
+<p class="p1">                    &lt;Icon className="w-4 h-4" /&gt;</p>
+<p class="p1">                    {child.label}</p>
+<p class="p1">                  &lt;/button&gt;</p>
+<p class="p1">                );</p>
+<p class="p1">              })}</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          )}</p>
+<p class="p1">          {isSidebarOpen &amp;&amp; memoryIndex.length &gt; 0 &amp;&amp; (</p>
+<p class="p1">            &lt;div className="mt-8 pt-4 border-t border-[#222]"&gt;</p>
+<p class="p1">              &lt;div className="flex items-center gap-2 px-3 mb-3"&gt;&lt;Database className="w-4 h-4 text-[#444]" /&gt;&lt;span className="text-[10px] font-bold uppercase text-[#444] tracking-widest"&gt;Memory&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;div For global side they have been opting in automatically for EN assets</p>
+<p class="p1">className="space-y-1 max-h-[300px] overflow-y-auto"&gt;</p>
+<p class="p1">                {memoryIndex.map(snap =&gt; (</p>
+<p class="p1">                  &lt;div key={snap.id} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all hover:bg-white/5 group"&gt;</p>
+<p class="p1">                    &lt;button type="button" onClick={() =&gt; { setGlobalData(snap.globalData || []); setRegionalData(snap.regionalData || {}); setCampaignHubData(snap.campaignHubData || {}); setLatestGlobalDate(snap.reportingDate); setIsAnalyzed(true); }} className="flex-1 text-[10px] font-bold text-[#666] group-hover:text-white"&gt;{snap.weekId}&lt;/button&gt;</p>
+<p class="p1">                    &lt;button type="button" onClick={() =&gt; { if (user) deleteDoc(doc(getFirestore(), 'artifacts', appId, 'public', 'data', 'snapshots', snap.id)); }} className="opacity-0 group-hover:opacity-100"&gt;&lt;Trash2 className="w-3 h-3 text-red-500" /&gt;&lt;/button&gt;</p>
+<p class="p1">                  &lt;/div&gt;</p>
+<p class="p1">                ))}</p>
+<p class="p1">              &lt;/div&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          )}</p>
+<p class="p1">        &lt;/nav&gt;</p>
+<p class="p1">        &lt;button type="button" onClick={() =&gt; setIsSidebarOpen(!isSidebarOpen)} className="p-6 border-t border-[#2a2a2a] text-[#555] hover:text-white flex items-center justify-center"&gt;&lt;Menu className="w-5 h-5" /&gt;&lt;/button&gt;</p>
+<p class="p1">      &lt;/aside&gt;</p>
+<p class="p1">      &lt;div className="flex-1 flex flex-col overflow-hidden relative"&gt;</p>
+<p class="p1">        &lt;header className="px-8 py-5 border-b border-[#2a2a2a] flex items-center justify-between bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-40"&gt;</p>
+<p class="p1">          &lt;h4 className="text-sm font-bold text-white uppercase tracking-widest"&gt;{activeTab}&lt;/h4&gt;</p>
+<p class="p1">          &lt;div className="flex items-center gap-4"&gt;&lt;button type="button" className="bg-white text-black px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-[#e0e0e0] shadow-xl flex items-center gap-2"&gt;&lt;Download className="w-3.5 h-3.5" /&gt; Export&lt;/button&gt;&lt;/div&gt;</p>
+<p class="p1">        &lt;/header&gt;</p>
+<p class="p1">        &lt;main className="flex-1 overflow-auto p-10 relative"&gt;</p>
+<p class="p1">          {activeTab === 'OKR' &amp;&amp; &lt;OKRAndRecsView globalData={globalData} regionalData={regionalData} latestDate={latestGlobalDate} /&gt;}</p>
+<p class="p1">          {(activeTab === 'Global Hub' || activeTab === 'Market Hub') &amp;&amp; (</p>
+<p class="p1">            &lt;div className="space-y-8 animate-in fade-in duration-500"&gt;</p>
+<p class="p1">              &lt;MetricControlHub activeMetrics={filteredMetrics} allowedMetrics={allowed} toggleMetric={m =&gt; setActiveMetrics(p =&gt; p.includes(m) ? (p.length &gt; 1 ? p.filter(x =&gt; x !== m) : p) : [...p, m])} handleAllToggle={() =&gt; setActiveMetrics(p =&gt; p.length === allowed.length ? ['DAU-SCT'] : [...allowed])} /&gt;</p>
+<p class="p1">              {activeTab === 'Market Hub' &amp;&amp; (</p>
+<p class="p1">                &lt;div className="flex items-center gap-4 p-4 bg-[#111] rounded-xl border border-[#2a2a2a] w-fit shadow-lg"&gt;&lt;MapPin className="w-6 h-6 text-red-600" /&gt;&lt;select value={activeMarketSubTab} onChange={e =&gt; setActiveMarketSubTab(e.target.value)} className="bg-transparent text-white font-bold uppercase outline-none cursor-pointer pr-8"&gt;{MARKET_SEGMENTS.map(m =&gt; &lt;option key={m} value={m} className="bg-neutral-900"&gt;{m}&lt;/option&gt;)}&lt;/select&gt;&lt;/div&gt;</p>
+<p class="p1">              )}</p>
+<p class="p1">              &lt;MasterTableView data={activeTab === 'Global Hub' ? globalData : (() =&gt; { const campaigns = regionalData[activeMarketSubTab] || []; const globalRef = globalData.find(d =&gt; eq(d.country, activeMarketSubTab) || eq(d.country, MARKET_KEYS[activeMarketSubTab])); return globalRef ? [{ ...globalRef, isAnchor: true }, ...campaigns] : campaigns; })()} activeMetrics={filteredMetrics} isCampaignView={activeTab === 'Market Hub'} hideDates={activeTab === 'Global Hub'} /&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          )}</p>
+<p class="p1">          {CAMPAIGN_CHILDREN.some(c =&gt; c.id === activeTab) &amp;&amp; (</p>
+<p class="p1">            &lt;div className="space-y-8 animate-in fade-in duration-500"&gt;</p>
+<p class="p1">              &lt;MetricControlHub activeMetrics={filteredMetrics} allowedMetrics={allowed} toggleMetric={m =&gt; setActiveMetrics(p =&gt; p.includes(m) ? (p.length &gt; 1 ? p.filter(x =&gt; x !== m) : p) : [...p, m])} handleAllToggle={() =&gt; setActiveMetrics(p =&gt; p.length === allowed.length ? ['DAU-SCT'] : [...allowed])} /&gt;</p>
+<p class="p1">              &lt;div className="flex items-center gap-4 p-4 bg-[#111] rounded-xl border border-[#2a2a2a] w-fit shadow-lg"&gt;&lt;MapPin className="w-6 h-6 text-red-600" /&gt;&lt;select value={tabMarketFilter[activeTab]} onChange={e =&gt; setTabMarketFilter(p =&gt; ({ ...p, [activeTab]: e.target.value }))} className="bg-transparent text-white font-bold uppercase outline-none cursor-pointer pr-8"&gt;{MARKET_SEGMENTS.map(m =&gt; &lt;option key={m} value={m} className="bg-neutral-900"&gt;{m}&lt;/option&gt;)}&lt;/select&gt;&lt;/div&gt;</p>
+<p class="p1">              &lt;MasterTableView data={(() =&gt; { const mkt = tabMarketFilter[activeTab]; const sub = subTabFilter[activeTab] || 'Generic'; const ss = subSubTabFilter[activeTab] || 'Default'; const path = campaignHubData[activeTab]?.[mkt]?.[sub]; const rows = ss === 'Default' || !ss ? (path ? Object.values(path).flat() : []) : (path?.[ss] || []); return activeTab === 'AlwaysOn' ? [...rows].sort((a,b) =&gt; (a.campaignStartDate || '').localeCompare(b.campaignStartDate || '')) : rows; })()} activeMetrics={filteredMetrics} isCampaignView isAlwaysOn={activeTab === 'AlwaysOn'} /&gt;</p>
+<p class="p1">            &lt;/div&gt;</p>
+<p class="p1">          )}</p>
+<p class="p1">        &lt;/main&gt;</p>
+<p class="p1">      &lt;/div&gt;</p>
+<p class="p1">      &lt;style&gt;{`</p>
+<p class="p1">        ::-webkit-scrollbar { width: 5px; height: 5px; }</p>
+<p class="p1">        ::-webkit-scrollbar-track { background: transparent; }</p>
+<p class="p1">        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 10px; }</p>
+<p class="p1">        ::-webkit-scrollbar-thumb:hover { background: #444; }</p>
+<p class="p1">        .no-scrollbar::-webkit-scrollbar { display: none; }</p>
+<p class="p1">        select { appearance: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E") no-repeat right 0.5rem center; background-size: 1em; }</p>
+<p class="p1">        .animate-in { animation: fadeIn 0.4s ease-out; }</p>
+<p class="p1">        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</p>
+<p class="p1">      `}&lt;/style&gt;</p>
+<p class="p1">    &lt;/div&gt;</p>
+<p class="p1">  );</p>
+<p class="p1">};</p>
+<p class="p2"><br></p>
+<p class="p1">export default App;</p>
+<p class="p2"><br></p>
+</body>
+</html>
