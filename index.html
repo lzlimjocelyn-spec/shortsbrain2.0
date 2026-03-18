@@ -1,10 +1,3211 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My Website</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script src="code.js"></script>
-  </body>
-</html>
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww38200\viewh21600\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 import React, \{ useState, useEffect, useMemo, useCallback \} from 'react';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 import \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Globe, RefreshCcw, Brain, MapPin, Sparkles, Download,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Layers, Zap, Play, TrendingUp, Users,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Target, ZapOff,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0UploadCloud, ClipboardCheck, Flag,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Wand2, Palette, Component as ComponentIcon,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0ChevronDown, ChevronUp, FolderKanban, Lightbulb, Copy, Edit2, Save, Plus,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0RotateCcw, Binary, Power, Settings2, Trash2,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Database, Clock, CheckCircle2, AlertCircle, Loader2,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0Menu, X, Filter, BarChart3, Calendar
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \} from 'lucide-react';
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // --- FIREBASE INTEGRATION ---
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 import \{ initializeApp \} from 'firebase/app';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 import \{\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \} from 'firebase/firestore';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 import \{\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \} from 'firebase/auth';
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // --- 1. CONFIGURATION & CONSTANTS ---
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const M_TYPES = ['DAU-SCT', 'DAC-SCT', 'GenAI DAU-SCT', 'Impressions'];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const MARKET_SEGMENTS = ['India', 'Indonesia', 'Japan', 'South Korea', 'AUNZ'];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const MARKET_KEYS = \{ 'India': 'IN', 'Indonesia': 'ID', 'Japan': 'JP', 'South Korea': 'KR', 'AUNZ': 'AUNZ' \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const MARKET_KEYS_REV = \{ 'IN': 'India', 'ID': 'Indonesia', 'JP': 'Japan', 'KR': 'South Korea', 'AUNZ': 'AUNZ' \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const AO_CATEGORIES = ['SSC', 'Shelf', 'UTS', 'MVR', 'UTS SFV'];
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const GENDERS_KEYS = ['female', 'male', 'total'];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const GENDERS_DISPLAY_MAP = \{ 'female': 'FEMALE', 'male': 'MALE', 'total': 'GenPop' \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const AGE_BUCKETS = ['18-24', '25-34', '18-34', '35+', 'total'];
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // RENAMED: 35+ to 35-44 for display
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const AGE_BUCKETS_DISPLAY_MAP = \{\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'18-24': '18-24',\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'25-34': '25-34',\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'18-34': '18-34',\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'35+': '35-44',\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'total': 'GenPop'\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const OKR_TARGETS = \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'APAC': 0.15, 'INDIA': 0.16, 'INDONESIA': 0.29, 'JAPAN': 1.2, 'SOUTH KOREA': 1.08, 'AUNZ': 1.56,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0'IN': 0.16, 'ID': 0.29, 'JP': 1.2, 'KR': 1.08
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const NAV_ITEMS = [
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'Upload', label: 'Data Ingestion', icon: UploadCloud \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'OKR', label: 'Shorts OKR Performance', icon: Target \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'Global Hub', label: 'Global Holdback', icon: Globe \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'Market Hub', label: 'Campaign Holdback', icon: Layers \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 ];
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const CAMPAIGN_CHILDREN = [
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'AlwaysOn', label: 'Always-On', icon: Zap \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'ScaledCreation', label: 'Scaled Creation', icon: Sparkles \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'Trends', label: 'Trends', icon: TrendingUp \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'CultMo', label: 'CultMo', icon: ComponentIcon \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'ArtMo', label: 'ArtMo', icon: Palette \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ id: 'GenAI Hub', label: 'GenAI Hub', icon: Wand2 \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 ];
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const DEMO_PERMS = [
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ g: 'total', a: 'total', label: 'GenPop' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ g: 'total', a: '18-34', label: 'GenPop 18-34' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ g: 'male', a: 'total', label: 'Male GenPop' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\{ g: 'female', a: 'total', label: 'Female GenPop' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 ];
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // --- 2. GLOBAL UTILITIES ---
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const cleanStr = (s) => (s || '').toString().replace(/['"]/g, '').replace(/\\u00A0/g, ' ').trim();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const superClean = (s) => cleanStr(s).toUpperCase().replace(/[^A-Z0-9]/g, '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const eq = (a, b) => superClean(a) === superClean(b);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const resolveMarketCode = (m) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const s = cleanStr(m).toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (s === 'INDIA' || s === 'IN') return 'IN';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (s === 'INDONESIA' || s === 'ID') return 'ID';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (s === 'JAPAN' || s === 'JP') return 'JP';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (s === 'SOUTH KOREA' || s === 'KR' || s === 'KOREA') return 'KR';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (s === 'AUNZ' || s === 'AUSTRALIA' || s === 'NZ') return 'AUNZ';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return s;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // Fixed to show 0.00 explicitly for numeric zeros
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 const formatCompactNumber = (val) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (val === 0) return '0.00';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (val === null || val === undefined || isNaN(val)) return '-';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return new Intl.NumberFormat('en-US', \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0notation: 'compact',
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0maximumFractionDigits: 1
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}).format(val);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const getWeekId = (dateStr) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const d = dateStr ? new Date(dateStr) : new Date();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (isNaN(d.getTime())) return `SNAPSHOT-$\{Date.now()\}`;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const year = d.getFullYear();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const oneJan = new Date(year, 0, 1);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const numberOfDays = Math.floor((d - oneJan) / (24 * 60 * 60 * 1000));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const result = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return `$\{year\}-W$\{result.toString().padStart(2, '0')\}`;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const robustParseDate = (dateStr) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const d = cleanStr(dateStr);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (!d || d === '-' || d === 'Unknown') return null;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (d.includes('-') && d.split('-')[0].length === 4) return d;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const parts = d.split(/[-/]/);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (parts.length === 3) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let v1 = parseInt(parts[0], 10), v2 = parseInt(parts[1], 10), y = parseInt(parts[2], 10);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (y < 100) y += 2000;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let month, day;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (v1 > 12) \{ day = v1; month = v2; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0else if (v2 > 12) \{ month = v1; day = v2; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0else \{ day = v1; month = v2; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (month > 12) return null;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0return `$\{y\}-$\{month.toString().padStart(2, '0')\}-$\{day.toString().padStart(2, '0')\}`;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const date = new Date(d);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\} catch \{ return null; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const calcDaysLive = (startStr, endStr) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const start = robustParseDate(startStr);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const end = robustParseDate(endStr);\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (!start || !end) return 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const s = new Date(start), e = new Date(end);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const diffTime = e.getTime() - s.getTime();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return diffDays >= 0 ? diffDays + 1 : 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\} catch \{ return 0; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const isCampaignEnded = (optEndDateStr, campaignEndDateStr) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const optDate = robustParseDate(optEndDateStr);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const campDate = robustParseDate(campaignEndDateStr);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (!optDate || !campDate) return false;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0try \{ return new Date(optDate) >= new Date(campDate); \} catch \{ return false; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const splitCSVLine = (line) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const columns = [];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0let current = "", inQuotes = false;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0for (let i = 0; i < line.length; i++) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const char = line[i];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (char === '"') inQuotes = !inQuotes;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0else if (char === ',' && !inQuotes) \{ columns.push(current.trim()); current = ""; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0else \{ current += char; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0columns.push(current.trim());
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return columns;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const findHeader = (headers, targets) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const upperHeaders = headers.map(h => (h || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const targetUpper = targets.map(t => t.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0for (const target of targetUpper) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const idx = upperHeaders.indexOf(target);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (idx !== -1) return idx;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return upperHeaders.findIndex(h => targetUpper.some(t => h.includes(t)));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const findMetadata = (rowKey, metaMap, marketContext = null) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const campKey = superClean(rowKey);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (marketContext) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const mktKey = superClean(marketContext);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (metaMap[mktKey]?.[campKey]) return metaMap[mktKey][campKey];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0for (const m in metaMap) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (metaMap[m][campKey]) return metaMap[m][campKey];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const parseCSVData = (text, existingAcc = \{\}, metaMap = \{\}, searchPriority = ['Campaign', 'Campaign Name', 'Country', 'Market'], forceAbs = false, marketContext = null) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const lines = text.split(/\\r?\\n/).filter(line => line.trim() !== '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (lines.length < 2) return existingAcc;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const headers = splitCSVLine(lines[0]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const identifierIdx = findHeader(headers, searchPriority);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const valTypeIdx = findHeader(headers, ['Value Type', 'Metric Type']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const sliceIdx = findHeader(headers, ['Slice']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const dateIdx = findHeader(headers, ['Date', 'Reporting Date', 'Day']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const dataStartIdx = findHeader(headers, ['Start Date', 'Trend Start', 'Trend Start Date']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const dataEndIdx = findHeader(headers, ['End Date', 'Trend End', 'Trend End Date']);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (identifierIdx === -1 || (valTypeIdx === -1 && !forceAbs)) return existingAcc;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const acc = \{ ...existingAcc \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0lines.slice(1).forEach(line => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const columns = splitCSVLine(line);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const rowValTypeRaw = valTypeIdx !== -1 ? (columns[valTypeIdx] || '').replace(/['"]/g, '').trim().toUpperCase() : '';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const rowSlice = sliceIdx !== -1 ? (columns[sliceIdx] || '').replace(/['"]/g, '').trim().toUpperCase() : '';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const rowDate = dateIdx !== -1 ? robustParseDate(columns[dateIdx]) : null;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const isRatioRow = !forceAbs && (rowValTypeRaw === 'RATIO (%)' || rowValTypeRaw === 'RATIO' || rowValTypeRaw.includes('LIFT')) && (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const isAbsRow = forceAbs && (rowValTypeRaw === 'DELTA' || rowValTypeRaw === '' || rowValTypeRaw === 'TOTAL') && (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const isSigRow = rowValTypeRaw.includes('TREND FAVORABILITY') && (rowSlice === 'CONTROL' || rowSlice === '' || rowSlice === 'TOTAL');
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (!isRatioRow && !isSigRow && !isAbsRow) return;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const rowKey = cleanStr(columns[identifierIdx]) || 'Unknown';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let gender = 'total';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const gIdx = findHeader(headers, ['Gender']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (gIdx !== -1) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const rawG = (columns[gIdx] || '').toLowerCase().trim();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (rawG === 'female' || rawG === 'f') gender = 'female';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawG === 'male' || rawG === 'm') gender = 'male';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawG === 'total' || rawG === 'genpop' || rawG === 'all' || rawG === '') gender = 'total';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let age = 'total';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const aIdx = findHeader(headers, ['Age', 'Age Group']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (aIdx !== -1) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const rawA = (columns[aIdx] || '').toLowerCase().trim();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (rawA.includes('18-24')) age = '18-24';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawA.includes('25-34')) age = '25-34';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawA.includes('18-34')) age = '18-34';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawA.includes('35')) age = '35+';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (rawA === 'total' || rawA === 'genpop' || rawA === 'all' || rawA === '') age = 'total';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (!acc[rowKey]) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const meta = findMetadata(rowKey, metaMap, marketContext);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const startVal = meta.campaignStartDate || (dataStartIdx !== -1 ? robustParseDate(columns[dataStartIdx]) : null);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const endVal = meta.campaignEndDate || (dataEndIdx !== -1 ? robustParseDate(columns[dataEndIdx]) : null);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0acc[rowKey] = \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0country: rowKey,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0metrics: \{\},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0isAnchor: superClean(rowKey).includes('GLOBALHOLDBACK'),
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0campaignStartDate: startVal,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0campaignEndDate: endVal,
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0optimisationEndDate: meta.optimisationEndDate || rowDate,\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0segmentTag: meta.subTab || 'Campaign Hub',
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0meta: meta
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0M_TYPES.forEach(m => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0acc[rowKey].metrics[m] = \{ female: \{\}, male: \{\}, total: \{\} \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0GENDERS_KEYS.forEach(g => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0AGE_BUCKETS.forEach(a => acc[rowKey].metrics[m][g][a] = \{ v: 0, sig: 0, abs: 0, isPaused: false, launchDate: null \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (rowDate && (!acc[rowKey].optimisationEndDate || rowDate > acc[rowKey].optimisationEndDate)) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0acc[rowKey].optimisationEndDate = rowDate;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0M_TYPES.forEach(m => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const aliases = \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0'DAU-SCT': ['DAU-SCT', 'DAILY SHORTS CREATION TOOL ACTIVE USERS'],
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0'DAC-SCT': ['DAC-SCT', 'DAILY SHORTS CONVERTERS'],
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0'GenAI DAU-SCT': ['GENAI DAU', 'GENAI DAILY ACTIVE USERS'],
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0'Impressions': ['IMPRESSIONS', 'TOTAL IMPRESSIONS', 'REACH']
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const targetCol = headers.findIndex(h => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const hUpper = h.toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const matchAlias = (aliases[m] || []).some(alias => hUpper.includes(alias));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return matchAlias && !(hUpper.includes('CONFIDENCE') || hUpper.includes('BOUND'));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (targetCol === -1) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const rawCell = (columns[targetCol] || '').replace(/['"]/g, '').trim();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const numericVal = parseFloat(rawCell.replace(/[^\\d.-]/g, '')) || 0;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isRatioRow) acc[rowKey].metrics[m][gender][age].v = numericVal;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (isAbsRow) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (m === 'Impressions') acc[rowKey].metrics[m][gender][age].v = numericVal;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else acc[rowKey].metrics[m][gender][age].abs = numericVal;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (isSigRow) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const sigText = rawCell.toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0acc[rowKey].metrics[m][gender][age].sig = (sigText.includes('POSITIVE') || sigText.includes('SSP')) ? 1 : (sigText.includes('NEGATIVE') || sigText.includes('SSN') ? -1 : 0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return acc;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\} catch \{ return existingAcc; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // --- 3. UI VIEW COMPONENTS ---
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const HubRowV2 = (\{ type, title, icon: Icon, tag, uploadedFiles, handleFileUpload \}) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const isPct = type === 'pct';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const bgColor = isPct ? 'bg-[#1a1500]' : 'bg-[#0a0a0a]';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const borderColor = isPct ? 'border-amber-500/30' : 'border-blue-500/30';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const iconColor = isPct ? 'text-amber-500' : 'text-blue-500';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const iconBg = isPct ? 'bg-amber-500/20' : 'bg-blue-500/20';
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className=\{`p-6 rounded-lg border $\{borderColor\} $\{bgColor\} mb-6 transition-all shadow-xl`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4 mb-6 px-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`p-2 rounded-lg flex items-center justify-center $\{iconBg\} $\{iconColor\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Icon className="w-5 h-5" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-left">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h2 className=\{`text-lg font-bold uppercase tracking-tight $\{iconColor\}`\}>\{title\}</h2>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]">\{tag\}</p>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-left items-stretch">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center text-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload(type, 'global', e.target.files[0])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all $\{uploadedFiles[type].global ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Globe className="w-7 h-7" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h3 className="font-bold text-[10px] mb-1.5 uppercase tracking-wider text-[#e0e0e0]">Global Hub Master</h3>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[8px] font-mono truncate w-full px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080] mb-2 text-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{uploadedFiles[type].global ? uploadedFiles[type].global.name : 'PUSH_MASTER_FILE'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all $\{Object.keys(uploadedFiles[type].countryHB).length > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Flag className="w-7 h-7" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h3 className="font-bold text-[10px] mb-3 uppercase tracking-wider text-[#e0e0e0]">Market Hub Nodes</h3>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="w-full grid grid-cols-5 gap-1 px-1">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{MARKET_SEGMENTS.map(m => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div key=\{m\} className="relative aspect-square group/item">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload(type, 'countryHB', e.target.files[0], m)\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-full h-full rounded-lg border flex items-center justify-center transition-all $\{uploadedFiles[type].countryHB[m] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-black border-[#3a3a3a] text-[#555] hover:border-[#808080]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[7px] font-black uppercase">\{MARKET_KEYS[m]\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex flex-col items-center hover:border-[#555] transition-all justify-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-lg mb-4 flex items-center justify-center transition-all $\{Object.keys(uploadedFiles[type].alwaysOn).length > 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Zap className="w-7 h-7" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h3 className="font-bold text-[10px] mb-3 uppercase tracking-wider text-[#e0e0e0]">Always-On Trends</h3>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="w-full grid grid-cols-2 gap-1.5 px-2">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{AO_CATEGORIES.map(cat => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div key=\{cat\} className="relative h-7 group/item">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload(type, 'alwaysOn', e.target.files[0], cat)\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-full h-full rounded-lg border flex items-center justify-center transition-all $\{uploadedFiles[type].alwaysOn[cat] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-black border-[#3a3a3a] text-[#555] hover:border-[#808080]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[7px] font-black uppercase">\{cat\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const LandingPage = (\{ uploadedFiles, handleFileUpload, startAnalysis, isAnalyzing \}) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0<div className="min-h-screen bg-black relative flex flex-col items-center py-10 px-6 text-[#e0e0e0] overflow-y-auto">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="max-w-[1500px] w-full z-10 text-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="mb-12">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="inline-block mb-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="bg-[#FF0000] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-red-500/20"><Brain className="text-white w-8 h-8" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h1 className="text-4xl font-bold tracking-tighter mb-1 uppercase">Shorts Brain <span className="text-[#FF0000]">2.0</span></h1>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<p className="text-[#808080] text-[10px] font-bold tracking-[0.4em] uppercase">APAC Marketing Incrementality Hub</p>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="p-6 rounded-lg border border-emerald-500/30 bg-[#0a1a0a] mb-6 transition-all shadow-xl">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4 mb-6 px-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="p-2 rounded-lg flex items-center justify-center bg-emerald-500/20 text-emerald-500"><Settings2 className="w-5 h-5" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-left">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h2 className="text-lg font-bold uppercase tracking-tight text-emerald-500">Structural Metadata Configuration</h2>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]">Campaign Definitions & State Instructions</p>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 $\{uploadedFiles.shared.campaignInfo ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}><ClipboardCheck className="w-6 h-6" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex-1 text-left min-w-0">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1">structural hierarchy</h4>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]">\{uploadedFiles.shared.campaignInfo ? uploadedFiles.shared.campaignInfo.name : 'PUSH_STRUCTURAL_CSV'\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload('shared', 'campaignInfo', e.target.files[0])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 $\{uploadedFiles.shared.pauseRelive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}><Power className="w-6 h-6" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex-1 text-left min-w-0">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1">State Instructions</h4>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]">\{uploadedFiles.shared.pauseRelive ? uploadedFiles.shared.pauseRelive.name : 'PUSH_INSTRUCTIONS_CSV'\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload('shared', 'pauseRelive', e.target.files[0])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<HubRowV2 type="pct" title="Ratio-Based Analysis" tag="Relative Lift Streams (%)" icon=\{TrendingUp\} uploadedFiles=\{uploadedFiles\} handleFileUpload=\{handleFileUpload\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<HubRowV2 type="abs" title="Volume-Based Analysis" tag="Discrete Delta Streams (Delta)" icon=\{Binary\} uploadedFiles=\{uploadedFiles\} handleFileUpload=\{handleFileUpload\} />
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="p-6 rounded-lg border border-purple-500/30 bg-[#0d0a1a] mb-6 transition-all shadow-xl">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4 mb-6 px-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="p-2 rounded-lg flex items-center justify-center bg-purple-500/20 text-purple-500"><Target className="w-5 h-5" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-left">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h2 className="text-lg font-bold uppercase tracking-tight text-purple-500">Attribution Analysis</h2>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<p className="text-[8px] font-bold text-[#808080] uppercase tracking-[0.3em]">Marketing Pressure & Reach Metrics</p>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="group relative border border-[#3a3a3a] bg-black rounded-lg p-5 flex items-center gap-6 hover:border-[#555] transition-all">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className=\{`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 $\{uploadedFiles.attribution.impressions ? 'bg-purple-500/10 text-purple-400' : 'bg-[#1a1a1a] text-[#555]'\}`\}><BarChart3 className="w-6 h-6" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex-1 text-left min-w-0">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h4 className="text-[10px] font-bold uppercase text-[#e0e0e0] mb-1">Impressions CSV</h4>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[8px] font-mono truncate px-2 py-1.5 rounded bg-black border border-[#3a3a3a] text-[#808080]">\{uploadedFiles.attribution.impressions ? uploadedFiles.attribution.impressions.name : 'PUSH_IMPRESSIONS_CSV'\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" onChange=\{(e) => handleFileUpload('attribution', 'impressions', e.target.files[0])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => startAnalysis()\} disabled=\{isAnalyzing\} className="px-12 py-5 rounded-2xl font-bold text-base bg-[#FF0000] text-white transition-all hover:bg-red-500 flex items-center gap-4 mx-auto uppercase mt-8 border border-white/10 shadow-2xl shadow-red-500/30 active:scale-95 disabled:opacity-50">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAnalyzing ? <RefreshCcw className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAnalyzing ? 'Processing APAC Data Streams...' : 'Execute Intelligent Engine'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 );
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const MetricControlHub = (\{ activeMetrics, toggleMetric, handleAllToggle, allowedMetrics = M_TYPES \}) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0<div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#3a3a3a] flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="flex flex-wrap gap-2 bg-black p-1 rounded-lg border border-[#3a3a3a]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\{allowedMetrics.map(m => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button key=\{m\} type="button" onClick=\{() => toggleMetric(m)\} className=\{`px-5 py-2.5 rounded-md text-[10px] font-bold tracking-widest uppercase transition-all cursor-pointer $\{activeMetrics.includes(m) ? 'bg-[#FF0000] text-white' : 'text-[#808080] hover:text-white'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{m\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<button type="button" onClick=\{() => handleAllToggle()\} className=\{`px-6 py-2.5 rounded-md text-[10px] font-bold tracking-widest uppercase border transition-all cursor-pointer $\{activeMetrics.length === allowedMetrics.length ? 'bg-white text-black border-white' : 'bg-transparent text-[#808080] border-[#3a3a3a] hover:border-[#808080]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\{activeMetrics.length === allowedMetrics.length ? 'Selective View' : 'Sync All Metrics'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 );
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const MasterTableView = (\{ data, activeMetrics, isCampaignView = false, hideDates = false, isAlwaysOn = false \}) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const themes = \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0female: \{ 1: 'bg-blue-900/40 text-blue-100', 2: 'bg-blue-900/20', 3: 'bg-blue-950/40 text-blue-400' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0male: \{ 1: 'bg-purple-900/40 text-purple-100', 2: 'bg-purple-900/20', 3: 'bg-purple-950/40 text-purple-400' \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0total: \{ 1: 'bg-amber-900/80 text-amber-50', 2: 'bg-amber-800/20', 3: 'bg-amber-950 text-amber-400 font-bold' \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const activeAges = AGE_BUCKETS;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (!data || data.length === 0) return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="py-40 text-center flex flex-col items-center justify-center gap-6">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="p-6 rounded-full bg-[#1a1a1a] border border-[#3a3a3a]"><ZapOff className="w-12 h-12 text-[#3a3a3a] animate-pulse" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<p className="text-[#808080] font-bold text-sm uppercase tracking-widest">No Data Available</p>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="bg-[#1a1a1a] rounded-lg border border-[#3a3a3a] overflow-hidden overflow-x-auto">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<table className="w-full text-center border-collapse">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<thead>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr className="text-[11px] font-bold uppercase tracking-widest border-b border-[#3a3a3a]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<th rowSpan=\{3\} className="px-8 py-8 text-left border-r border-[#3a3a3a] bg-[#1a1a1a] sticky left-0 z-40 text-white min-w-[300px]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAlwaysOn ? 'Trend Identifier' : (isCampaignView ? 'Campaign Entity' : 'Country / Market')\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</th>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{GENDERS_KEYS.map((g, gi) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<th key=\{g\} colSpan=\{activeAges.length * activeMetrics.length\} className=\{`py-6 border-white/10 $\{themes[g][1]\} $\{gi < GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : ''\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center justify-center gap-3"><Users className="w-4 h-4 opacity-50" />\{GENDERS_DISPLAY_MAP[g]\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</th>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr className="text-[10px] font-bold uppercase tracking-widest border-b border-[#3a3a3a]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{GENDERS_KEYS.map((g) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<React.Fragment key=\{g\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeAges.map((a, ai) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<th key=\{a\} colSpan=\{activeMetrics.length\} className=\{`py-4 transition-colors $\{themes[g][2]\} $\{ai === activeAges.length - 1 && GENDERS_KEYS.indexOf(g) < GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'\}`\}>\{AGE_BUCKETS_DISPLAY_MAP[a]\}</th>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</React.Fragment>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr className="text-[9px] font-bold uppercase tracking-[0.2em] border-b border-[#3a3a3a]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{GENDERS_KEYS.map((g) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<React.Fragment key=\{g\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeAges.map((a, ai) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<React.Fragment key=\{a\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeMetrics.map((m, mi) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<th key=\{m\} className=\{`py-3 px-3 font-mono $\{themes[g][3]\} $\{ai === activeAges.length - 1 && mi === activeMetrics.length - 1 && GENDERS_KEYS.indexOf(g) < GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'\}`\}>\{m.includes('GenAI') ? 'GenAI' : (m === 'Impressions' ? 'Imprs' : m.split('-')[0])\}</th>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</React.Fragment>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</React.Fragment>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</thead>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tbody className="divide-y divide-white/5">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{data.map((row, ri) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const isAnchorRow = !!row.isAnchor;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const daysLive = isAlwaysOn\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0? calcDaysLive(row.campaignStartDate, row.campaignEndDate || row.optimisationEndDate)
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0: calcDaysLive(row.campaignStartDate, row.optimisationEndDate);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr key=\{ri\} className=\{`transition-all duration-200 $\{isAnchorRow ? 'bg-white/[0.05]' : 'hover:bg-white/[0.03]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className=\{`px-8 py-5 text-left border-r border-[#3a3a3a] sticky left-0 z-10 bg-[#111] $\{isAnchorRow ? 'text-blue-400 font-bold' : 'text-[#e0e0e0]'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-col gap-1.5">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="font-bold text-[12px] uppercase tracking-tight">\{row.country\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{!hideDates && !isAnchorRow && (row.campaignStartDate || isAlwaysOn) && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-col gap-1.5 mt-2 p-2 rounded bg-black/40 border border-white/5 shadow-inner">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-2">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Calendar className="w-3 h-3 text-blue-400" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[9px] font-mono tracking-tighter text-[#888]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="font-bold uppercase text-[8px] mr-1">\{isAlwaysOn ? 'Trend Start:' : 'Start:'\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{row.campaignStartDate || 'N/A'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-2">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Calendar className="w-3 h-3 text-amber-400" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[9px] font-mono tracking-tighter text-[#888]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="font-bold uppercase text-[8px] mr-1">\{isAlwaysOn ? 'Trend End:' : 'End:'\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{row.campaignEndDate || 'Active'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-2 mt-1">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Clock className="w-3 h-3 text-emerald-400" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[9px] font-bold tracking-tighter uppercase text-emerald-400">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAlwaysOn ? 'Trend Days Live:' : 'Days Live:'\} \{daysLive\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAnchorRow && isCampaignView && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[9px] uppercase tracking-widest text-blue-500 font-black mt-1 italic">Reference Baseline</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{GENDERS_KEYS.map((g) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<React.Fragment key=\{g\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeAges.map((a, ai) => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<React.Fragment key=\{a\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeMetrics.map((m) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const node = row.metrics[m][g][a];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const isEnd = ai === activeAges.length - 1 && activeMetrics.indexOf(m) === activeMetrics.length - 1;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let style = "text-slate-500 font-medium", bg = "";
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const showPaused = node.isPaused && !isAnchorRow;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (showPaused) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0style = "text-[#808080] font-bold";
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0bg = "bg-[#1a1a1a]";
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (node.sig === -1) \{ style = "text-red-500 font-bold"; bg = "bg-red-500/10"; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (node.sig === 1) \{ style = "text-emerald-500 font-bold"; bg = "bg-emerald-500/10"; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else if (node.v !== 0) \{ style = "text-slate-100 font-bold"; \}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td key=\{m\} className=\{`py-5 px-3 font-mono text-[13px] tabular-nums $\{style\} $\{bg\} $\{isEnd && GENDERS_KEYS.indexOf(g) < GENDERS_KEYS.length - 1 ? 'border-r-2 border-white/20' : 'border-r border-white/5'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-col items-center text-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{showPaused ? (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="leading-none uppercase">Paused</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[7px] opacity-60 font-sans tracking-tight block mt-0.5 font-normal leading-none uppercase italic">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{node.launchDate || 'No Data'\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0) : (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{m === 'Impressions'\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0? formatCompactNumber(node.v)
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0: (node.v === 0 ? '0.00' : (node.v > 0 ? `+$\{node.v.toFixed(2)\}` : `$\{node.v.toFixed(2)\}`))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{node.abs !== 0 && m !== 'Impressions' && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className="text-[9px] opacity-50 font-sans tracking-tighter block mt-0.5 font-normal leading-none">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0(\{node.abs > 0 ? `+$\{Math.round(node.abs).toLocaleString()\}` : Math.round(node.abs).toLocaleString()\})
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\})\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</React.Fragment>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</React.Fragment>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\})\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tbody>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</table>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const OKRAndRecsView = (\{ globalData, regionalData, latestDate \}) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [editingId, setEditingId] = useState(null);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [editedRows, setEditedRows] = useState(\{\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [manualPointers, setManualPointers] = useState([]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [isAddingManual, setIsAddingManual] = useState(false);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [deletedRowIds, setDeletedRowIds] = useState(new Set());
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [copyFeedback, setCopyFeedback] = useState(null);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [newManualForm, setNewManualForm] = useState(\{ country: 'APAC', campaign: '', age: 'GenPop', gender: 'GenPop', recommendation: 'MAINTAIN', justification: '' \});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const showFeedback = (msg) => \{ setCopyFeedback(msg); setTimeout(() => setCopyFeedback(null), 2000); \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const daysLeft = useMemo(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (!latestDate) return "TBD";
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const endQ = new Date("2026-03-31");
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const current = new Date(latestDate);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const diffTime = Math.ceil((endQ - current) / (1000 * 60 * 60 * 24));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return diffTime > 0 ? diffTime : 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, [latestDate]);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const okrStats = useMemo(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return ['APAC', 'India', 'Indonesia', 'Japan', 'South Korea', 'AUNZ'].map(mName => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const record = globalData.find(d => eq(d.country, mName) || eq(d.country, MARKET_KEYS[mName]));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const actual = record?.metrics?.['DAU-SCT']?.total?.total?.v || 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const target = OKR_TARGETS[mName.toUpperCase()] || 1.00;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const perfIndex = target > 0 ? (actual / target) * 100 : 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0return \{ market: mName.toUpperCase(), actual, target, perfIndex, isOffline: !record \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, [globalData]);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const recommendationRows = useMemo(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const tableData = [];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0MARKET_SEGMENTS.forEach(market => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const allCampsInMarket = regionalData[market] || [];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0allCampsInMarket.forEach((camp, ci) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isCampaignEnded(camp.optimisationEndDate, camp.campaignEndDate)) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const metrics = camp.metrics?.['DAU-SCT'] || \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (metrics.total?.total?.isPaused) return;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const isNeg = (g, a) => (metrics[g]?.[a]?.v || 0) < -0.0001 && !metrics[g]?.[a]?.isPaused;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const isPosSig = (g, a) => (metrics[g]?.[a]?.sig || 0) === 1 && !metrics[g]?.[a]?.isPaused;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mKey = MARKET_KEYS[market] || market.toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const aoScalingRestricted = ['SHELF', 'SSC', 'UTS', 'MVR'];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let isAO = false;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const currentCampaignSuper = superClean(camp.country);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0for (const cat of aoScalingRestricted) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (cat === 'UTS' && currentCampaignSuper.includes('UTSSFV')) continue;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (currentCampaignSuper.includes(superClean(cat))) \{ isAO = true; break; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const gpNode = metrics.total?.total || \{ v: 0, sig: 0 \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!isAO && gpNode.sig === 1 && gpNode.v > 0.001) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0tableData.push(\{ id: `CAMP_$\{market\}_$\{ci\}_SC`, country: mKey, campaign: camp.country, age: "GenPop", gender: "GenPop", recommendation: "SCALE", justification: `$\{mKey\} $\{camp.country\} - Scale GenPop: Stat-sig positive lift (+$\{gpNode.v.toFixed(2)\}%) observed.` \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const getPausedAges = (gK) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let dirs = [];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isNeg(gK, '18-24') && isNeg(gK, '25-34') && isNeg(gK, '35+')) return ['total'];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isNeg(gK, '18-24') && isNeg(gK, '25-34')) dirs.push('18-34');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0else \{ if (isNeg(gK, '18-24')) dirs.push('18-24'); if (isNeg(gK, '25-34')) dirs.push('25-34'); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isNeg(gK, '35+')) dirs.push('35+');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return dirs;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const common = getPausedAges('male').filter(a => getPausedAges('female').includes(a));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const maleUnq = getPausedAges('male').filter(a => !common.includes(a));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const femaleUnq = getPausedAges('female').filter(a => !common.includes(a));
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const addPause = (gK, aK, tag) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const v = metrics[gK]?.[aK]?.v || 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0tableData.push(\{ id: `CAMP_$\{market\}_$\{ci\}_P_$\{gK\}_$\{aK\}`, country: mKey, campaign: camp.country, age: aK === 'total' ? 'GenPop' : aK, gender: gK === 'total' ? 'GenPop' : gK.toUpperCase(), recommendation: "PAUSE", justification: `$\{mKey\} $\{camp.country\} - Pause $\{tag\}$\{aK\} given negative lift ($\{v.toFixed(2)\}%)` \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0common.forEach(a => addPause('total', a, 'G'));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0maleUnq.forEach(a => addPause('male', a, 'M'));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0femaleUnq.forEach(a => addPause('female', a, 'F'));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!isAO) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0DEMO_PERMS.filter(d => d.g !== 'total').forEach(demo => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (isPosSig(demo.g, demo.a)) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const v = metrics[demo.g]?.[demo.a]?.v || 0;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0tableData.push(\{ id: `CAMP_$\{market\}_$\{ci\}_SC_$\{demo.g\}_$\{demo.a\}`, country: mKey, campaign: camp.country, age: demo.a === 'total' ? 'GenPop' : demo.a, gender: demo.g.toUpperCase(), recommendation: "SCALE", justification: `$\{mKey\} $\{camp.country\} - Scale $\{demo.g.charAt(0).toUpperCase()\}$\{demo.a\} given positive lift (+$\{v.toFixed(2)\}%)` \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const merged = [...tableData, ...manualPointers].filter(r => !deletedRowIds.has(r.id));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return merged.map(r => editedRows[r.id] ? \{ ...r, ...editedRows[r.id] \} : r);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, [regionalData, manualPointers, deletedRowIds, editedRows]);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const handleAddNewManual = () => \{ if (!newManualForm.campaign) return; setManualPointers(p => [...p, \{ ...newManualForm, id: `MANUAL_$\{Date.now()\}` \}]); setIsAddingManual(false); setNewManualForm(\{ country: 'APAC', campaign: '', age: 'GenPop', gender: 'GenPop', recommendation: 'MAINTAIN', justification: '' \}); \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="w-full max-w-[1600px] mx-auto pb-32">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\{copyFeedback && <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-white px-6 py-3 rounded-lg font-bold text-xs uppercase shadow-xl">\{copyFeedback\}</div>\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-col lg:flex-row justify-between lg:items-end mb-12 gap-8 border-b border-[#3a3a3a] pb-8">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight uppercase">Shorts OKR Performance</h1>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-wrap gap-10 pt-4">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-1"><p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest">Quarter Start</p><p className="text-lg font-bold text-white">2026-02-01</p></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-1"><p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest">Reporting Date</p><p className="text-lg font-bold text-emerald-400">\{latestDate || "Awaiting Data..."\}</p></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-1"><p className="text-[10px] font-bold text-[#808080] uppercase tracking-widest">Days Left</p><p className="text-lg font-bold text-amber-400">\{daysLeft\} <span className="text-[10px] text-[#808080] font-normal ml-1">remaining</span></p></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{okrStats.map((stat, idx) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cfg = getStatusConfig(stat.perfIndex, stat.isOffline);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div key=\{idx\} className=\{`relative $\{cfg.cardBg\} rounded-lg p-6 border border-[#3a3a3a] transition-all hover:border-[#555] shadow-sm`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex justify-between items-start mb-6"><h3 className="text-xl font-bold text-white uppercase">\{stat.market\}</h3>\{!stat.isOffline && <BarChart3 className=\{`w-5 h-5 $\{cfg.color\}`\} />\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-baseline gap-2 mb-4"><span className="text-3xl font-bold text-white">\{(stat.perfIndex || 0).toFixed(1)\}%</span><span className="text-[9px] font-bold text-[#808080] uppercase tracking-tighter">INDEX</span></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="relative h-1.5 w-full bg-black rounded-full overflow-hidden mb-4"><div className=\{`h-full $\{cfg.accent\} transition-all duration-1000`\} style=\{\{ width: `$\{Math.min(stat.perfIndex, 100)\}%` \}\} /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex justify-between pt-4 border-t border-[#3a3a3a] font-mono text-[10px]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[#808080] uppercase">Actual: <span className="text-white">+\{stat.actual.toFixed(2)\}%</span></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="text-[#808080] uppercase">Target: <span className="text-[#b0b0b0]">\{stat.target.toFixed(2)\}%</span></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\})\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-8">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4"><div className="p-3 bg-[#1a1a1a] rounded-lg border border-[#3a3a3a]"><Lightbulb className="w-6 h-6 text-amber-400" /></div><div><h2 className="text-2xl font-bold text-white uppercase">Strategic Guidance</h2><p className="text-[#808080] text-xs uppercase tracking-widest mt-1 font-medium">Data-Driven Directives & Overrides</p></div></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex flex-wrap gap-3">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => setIsAddingManual(true)\} className="flex items-center gap-2 bg-[#FF0000] text-white px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-red-500 shadow-lg transition-all active:scale-95"><Plus className="w-4 h-4" /> Add Pointer</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => \{ if (recommendationRows.length === 0) return; const headers = "Market\\tEntity\\tAge\\tGender\\tDirective\\tJustification"; const body = recommendationRows.map(r => `$\{r.country\}\\t$\{r.campaign\}\\t$\{r.age\}\\t$\{r.gender\}\\t$\{r.recommendation\}\\t$\{r.justification\}`).join('\\n'); copyToClipboard(`$\{headers\}\\n$\{body\}`); showFeedback("Matrix Copied for Sheets"); \}\} className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-[#e0e0e0] shadow-lg transition-all active:scale-95"><Copy className="w-4 h-4" /> Copy All</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => \{ setDeletedRowIds(new Set()); setEditedRows(\{\}); setManualPointers([]); showFeedback("Matrix Restored"); \}\} className="flex items-center gap-2 bg-[#1a1a1a] text-[#808080] px-5 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:text-white transition-all border border-[#3a3a3a] active:scale-95"><RotateCcw className="w-4 h-4" /> Restore</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isAddingManual && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="bg-[#1a1a1a] border border-[#FF0000]/30 rounded-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div><label className="text-[9px] font-bold text-[#808080] uppercase block mb-2">Market</label><input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold uppercase text-white" value=\{newManualForm.country\} onChange=\{e => setNewManualForm(p => (\{...p, country: e.target.value.toUpperCase()\}))\} /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div><label className="text-[9px] font-bold text-[#808080] uppercase block mb-2">Entity</label><input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" placeholder="e.g. Veo" value=\{newManualForm.campaign\} onChange=\{e => setNewManualForm(p => (\{...p, campaign: e.target.value\}))\} /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div><label className="text-[9px] font-bold text-[#808080] uppercase block mb-2">Age</label><input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value=\{newManualForm.age\} onChange=\{e => setNewManualForm(p => (\{...p, age: e.target.value\}))\} /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div><label className="text-[9px] font-bold text-[#808080] uppercase block mb-2">Gender</label><input className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value=\{newManualForm.gender\} onChange=\{e => setNewManualForm(p => (\{...p, gender: e.target.value\}))\} /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div><label className="text-[9px] font-bold text-[#808080] uppercase block mb-2">Directive</label>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<select className="w-full bg-black border border-[#3a3a3a] rounded-md p-2.5 text-[11px] font-bold text-white" value=\{newManualForm.recommendation\} onChange=\{e => setNewManualForm(p => (\{...p, recommendation: e.target.value\}))\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<option value="MAINTAIN">MAINTAIN</option><option value="SCALE">SCALE</option><option value="PAUSE">PAUSE</option>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</select>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<textarea className="w-full h-24 bg-black border border-[#3a3a3a] rounded-lg p-3 text-[11px] text-[#b0b0b0] mb-4 resize-none" value=\{newManualForm.justification\} onChange=\{e => setNewManualForm(p => (\{...p, justification: e.target.value\}))\} placeholder="Context..." />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex justify-end gap-3">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => setIsAddingManual(false)\} className="bg-[#1a1a1a] text-[#808080] px-5 py-2.5 rounded-lg font-bold text-[10px] uppercase border border-[#3a3a3a]">Cancel</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{handleAddNewManual\} className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-[10px] uppercase shadow-lg">Confirm</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="bg-[#1a1a1a] rounded-lg border border-[#3a3a3a] overflow-hidden overflow-x-auto shadow-sm">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<table className="w-full border-collapse text-[11px]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<thead>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr className="bg-[#111] text-[#808080] uppercase tracking-widest border-b border-[#3a3a3a] font-bold">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<th className="px-8 py-6 text-left">Market</th><th className="px-8 py-6 text-left">Entity</th><th className="px-8 py-6 text-center">Age</th><th className="px-8 py-6 text-center">Gender</th><th className="px-8 py-6 text-left">Directive</th><th className="px-8 py-6 text-left">Justification</th><th className="px-8 py-6 text-center">Action</th>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</thead>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tbody className="divide-y divide-white/5">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{recommendationRows.map(row => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<tr key=\{row.id\} className=\{`hover:bg-white/[0.02] group/row transition-colors $\{row.recommendation === 'PAUSE' ? 'bg-red-500/[0.03]' : ''\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 font-bold uppercase text-blue-400">\{row.country\}</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 font-bold text-[#e0e0e0] truncate max-w-[200px]">\{row.campaign\}</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 text-center text-[#b0b0b0] uppercase font-mono">\{row.age\}</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 text-center text-[#b0b0b0] uppercase font-mono">\{row.gender\}</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 font-bold">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{editingId === row.id ? (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<select className="bg-black/60 border border-white/10 rounded-lg p-2 text-[10px] text-white" value=\{editedRows[row.id]?.recommendation || row.recommendation\} onChange=\{e => setEditedRows(p => (\{...p, [row.id]: \{...(p[row.id] || row), recommendation: e.target.value\}\}))\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<option value="MAINTAIN">MAINTAIN</option><option value="SCALE">SCALE</option><option value="PAUSE">PAUSE</option>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</select>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0) : (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<span className=\{row.recommendation === 'PAUSE' ? 'text-red-400' : (row.recommendation === 'SCALE' ? 'text-emerald-400' : 'text-amber-400')\}>\{row.recommendation\}</span>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-4 text-[#808080] max-w-[300px] leading-relaxed">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{editingId === row.id ? (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<textarea className="w-full bg-black/60 border border-white/10 rounded-lg p-2 text-[10px] min-h-[60px] resize-none" value=\{editedRows[row.id]?.justification || row.justification\} onChange=\{e => setEditedRows(p => (\{...p, [row.id]: \{...(p[row.id] || row), justification: e.target.value\}\}))\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0) : row.justification\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<td className="px-8 py-5 text-center">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center justify-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{editingId === row.id ? (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => setEditingId(null)\} className="p-2.5 rounded-xl bg-emerald-600 text-white"><Save className="w-4 h-4" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0) : (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => setEditingId(row.id)\} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white"><Edit2 className="w-4 h-4" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => \{ copyToClipboard(`$\{row.country\}\\t$\{row.campaign\}\\t$\{row.age\}\\t$\{row.gender\}\\t$\{row.recommendation\}\\t$\{row.justification\}`); showFeedback("Row Copied"); \}\} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-emerald-400"><Copy className="w-4 h-4" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button onClick=\{() => setDeletedRowIds(p => new Set([...p, row.id]))\} className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</td>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tr>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</tbody>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</table>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{recommendationRows.length === 0 && <div className="p-20 text-center text-[#555] font-bold uppercase tracking-widest text-[10px]">Matrix Empty</div>\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 // --- MAIN APPLICATION COMPONENT ---
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 const App = () => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [isAnalyzed, setIsAnalyzed] = useState(false);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [isAnalyzing, setIsAnalyzing] = useState(false);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [activeTab, setActiveTab] = useState('OKR');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [activeMetrics, setActiveMetrics] = useState(['DAU-SCT']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [isCampaignTypeExpanded, setIsCampaignTypeExpanded] = useState(false);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [activeMarketSubTab, setActiveMarketSubTab] = useState('India');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [latestGlobalDate, setLatestGlobalDate] = useState(null);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [user, setUser] = useState(null);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [tabMarketFilter, setTabMarketFilter] = useState(\{ 'ScaledCreation': 'India', 'Trends': 'India', 'CultMo': 'India', 'ArtMo': 'India', 'GenAI Hub': 'India', 'AlwaysOn': 'India' \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [subTabFilter, setSubTabFilter] = useState(\{ 'ScaledCreation': '', 'Trends': '', 'CultMo': '', 'ArtMo': '', 'GenAI Hub': '', 'AlwaysOn': '' \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [subSubTabFilter, setSubSubTabFilter] = useState(\{ 'ScaledCreation': '', 'Trends': '', 'CultMo': '', 'ArtMo': '', 'GenAI Hub': '', 'AlwaysOn': '' \});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [globalData, setGlobalData] = useState([]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [regionalData, setRegionalData] = useState(\{\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [campaignHubData, setCampaignHubData] = useState(\{\});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [uploadedFiles, setUploadedFiles] = useState(\{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0pct: \{ global: null, countryHB: \{\}, alwaysOn: \{\} \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0abs: \{ global: null, countryHB: \{\}, alwaysOn: \{\} \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0shared: \{ campaignInfo: null, pauseRelive: null \},
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0attribution: \{ impressions: null \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [memoryIndex, setMemoryIndex] = useState([]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const [memoryStatus, setMemoryStatus] = useState('idle');
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const firebaseConfig = useMemo(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0return JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '\{\}');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\} catch \{ return \{\}; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, []);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const appId = typeof __app_id !== 'undefined' ? __app_id : 'shorts-brain-v2';
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0useEffect(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (!firebaseConfig.apiKey) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const app = initializeApp(firebaseConfig);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const auth = getAuth(app);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const db = getFirestore(app);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const initAuth = async () => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0else await signInAnonymously(auth);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0initAuth();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const unsubscribe = onAuthStateChanged(auth, setUser);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return () => unsubscribe();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, [firebaseConfig]);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0useEffect(() => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (!user) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const db = getFirestore();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const snapshotsCol = collection(db, 'artifacts', appId, 'public', 'data', 'snapshots');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const unsubscribe = onSnapshot(snapshotsCol, (snap) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const data = snap.docs.map(doc => (\{ ...doc.data(), id: doc.id \}));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0setMemoryIndex(data.sort((a, b) => b.timestamp - a.timestamp));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\}, (err) => console.error(err));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return () => unsubscribe();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\}, [user, appId]);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const saveSnapshotToCloud = async (snapshotData) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (!user) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const db = getFirestore();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0setMemoryStatus('saving');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const snapId = `snap_$\{Date.now()\}`;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'snapshots', snapId);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0await setDoc(docRef, \{ ...snapshotData, id: snapId, timestamp: Date.now(), weekId: getWeekId(snapshotData.reportingDate) \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0setMemoryStatus('saved');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0setTimeout(() => setMemoryStatus('idle'), 3000);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\} catch \{ setMemoryStatus('error'); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const startAnalysis = async () => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0setIsAnalyzing(true);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0try \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const readFile = (f) => new Promise(res => \{ if (!f) res(""); const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsText(f); \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let metaLookup = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (uploadedFiles.shared.campaignInfo) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const text = await readFile(uploadedFiles.shared.campaignInfo);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const lines = text.split(/\\r?\\n/).filter(l => l.trim() !== '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (lines.length > 1) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const hdrs = splitCSVLine(lines[0]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cIdx = findHeader(hdrs, ['Campaign', 'Campaign Name']), mktIdx = findHeader(hdrs, ['Market', 'Country']), tabIdx = findHeader(hdrs, ['Campaign Tabs', 'Tabs', 'Tab']), subTabIdx = findHeader(hdrs, ['Campaign Sub tabs', 'Sub tabs', 'Sub tab', 'Sub category']), ssTabIdx = findHeader(hdrs, ['Campaign Hub Sub Sub tabs', 'Sub sub tabs']), sIdx = findHeader(hdrs, ['Start Date']), eIdx = findHeader(hdrs, ['End Date']), oIdx = findHeader(hdrs, ['Optimisation End Date']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lines.slice(1).forEach(line => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cols = splitCSVLine(line);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const name = cleanStr(cols[cIdx]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (name) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const rawMkt = cleanStr(cols[mktIdx]).toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const resMkt = MARKET_KEYS_REV[rawMkt] || MARKET_SEGMENTS.find(s => eq(s, rawMkt)) || 'India';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!metaLookup[superClean(resMkt)]) metaLookup[superClean(resMkt)] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0metaLookup[superClean(resMkt)][superClean(name)] = \{ market: resMkt, tab: cleanStr(cols[tabIdx]), subTab: cleanStr(cols[subTabIdx]), subSubTab: cleanStr(cols[ssTabIdx]), campaignStartDate: cleanStr(cols[sIdx]), campaignEndDate: cleanStr(cols[eIdx]), optimisationEndDate: cleanStr(cols[oIdx]) \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let instructionMap = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (uploadedFiles.shared.pauseRelive) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const text = await readFile(uploadedFiles.shared.pauseRelive);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const lines = text.split(/\\r?\\n/).filter(l => l.trim() !== '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (lines.length > 1) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const hdrs = splitCSVLine(lines[0]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cIdx = findHeader(hdrs, ['Campaign', 'Campaign Name']), mIdx = findHeader(hdrs, ['Market', 'Country']), aIdx = findHeader(hdrs, ['Age', 'Age Group', 'Slice']), gIdx = findHeader(hdrs, ['Gender']), iIdx = findHeader(hdrs, ['Instruction', 'Action']), dIdx = findHeader(hdrs, ['Launch Date', 'Date']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0lines.slice(1).forEach(l => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cols = splitCSVLine(l);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mCode = resolveMarketCode(cols[mIdx]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cKey = superClean(cols[cIdx]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let aK = cleanStr(cols[aIdx]).toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0aK = (aK === 'GENPOP' || aK === 'TOTAL' || !aK) ? 'total' : aK.toLowerCase().replace(/[^a-z0-9+]/g, '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let gK = cleanStr(cols[gIdx]).toUpperCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0gK = (gK === 'GENPOP' || gK === 'TOTAL' || !gK) ? 'total' : gK.toLowerCase();
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (cleanStr(cols[iIdx]).toUpperCase() === 'PAUSE') \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!instructionMap[mCode]) instructionMap[mCode] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!instructionMap[mCode][cKey]) instructionMap[mCode][cKey] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!instructionMap[mCode][cKey][gK]) instructionMap[mCode][cKey][gK] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0instructionMap[mCode][cKey][gK][aK] = cleanStr(cols[dIdx]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const structTemp = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const route = (parsedMap, defaultMarket, forceTab = null, forceSub = null) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.values(parsedMap).forEach(row => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const meta = row.meta || \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let tabRaw = forceTab || cleanStr(meta.tab);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const child = CAMPAIGN_CHILDREN.find(c => eq(c.id, tabRaw) || eq(c.label, tabRaw));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mkName = meta.market || defaultMarket || 'India';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mCode = resolveMarketCode(mkName);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const cK = superClean(row.country);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let mInstr = instructionMap[mCode]?.[cK];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!mInstr && meta.subSubTab) mInstr = instructionMap[mCode]?.[superClean(meta.subSubTab)];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!mInstr && meta.subTab) mInstr = instructionMap[mCode]?.[superClean(meta.subTab)];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!mInstr && forceSub) mInstr = instructionMap[mCode]?.[superClean(forceSub)];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const hasEnded = isCampaignEnded(row.optimisationEndDate, row.campaignEndDate);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0M_TYPES.forEach(m => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0GENDERS_KEYS.forEach(g => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0AGE_BUCKETS.forEach(a => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (defaultMarket === 'APAC' && !meta.market) return;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (hasEnded) \{ row.metrics[m][g][a].isPaused = true; row.metrics[m][g][a].launchDate = row.campaignEndDate || 'Ended'; return; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (mInstr) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const sA = a.replace(/[^a-z0-9+]/g, ''), pA = (sA === '1824' || sA === '2534') ? '1834' : null;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const ks = [[g, sA], pA ? [g, pA] : null, [g, 'total'], ['total', sA], pA ? ['total', pA] : null, ['total', 'total']].filter(Boolean);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0for (const [tg, ta] of ks) \{ if (mInstr[tg]?.[ta]) \{ row.metrics[m][g][a].isPaused = true; row.metrics[m][g][a].launchDate = mInstr[tg][ta]; break; \} \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (child) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const sub = forceSub || cleanStr(meta.subTab) || 'Generic', ss = cleanStr(meta.subSubTab) || 'Default';
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!structTemp[child.id]) structTemp[child.id] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!structTemp[child.id][mkName]) structTemp[child.id][mkName] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!structTemp[child.id][mkName][sub]) structTemp[child.id][mkName][sub] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (!structTemp[child.id][mkName][sub][ss]) structTemp[child.id][mkName][sub][ss] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0structTemp[child.id][mkName][sub][ss][cK] = row;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let dGlobalD = null;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const process = async (st, isAb = false) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const s = uploadedFiles[st];
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0let sgd = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (s.global) \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const text = await readFile(s.global);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (st === 'pct') \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const lines = text.split(/\\r?\\n/).filter(l => l.trim() !== '');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const h = splitCSVLine(lines[0]);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const di = findHeader(h, ['Date', 'Reporting Date']);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0if (di !== -1) \{ let md = null; lines.slice(1).forEach(l => \{ const d = robustParseDate(splitCSVLine(l)[di]); if (d && (!md || d > md)) md = d; \}); dGlobalD = md; setLatestGlobalDate(md); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0sgd = parseCSVData(text, \{\}, metaLookup, ['Country', 'Market', 'Campaign'], isAb, null);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mh = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0for (const m of MARKET_SEGMENTS) \{ if (s.countryHB[m]) mh[m] = parseCSVData(await readFile(s.countryHB[m]), \{\}, metaLookup, undefined, isAb, m); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const ao = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0for (const c of AO_CATEGORIES) \{ if (s.alwaysOn[c]) ao[c] = parseCSVData(await readFile(s.alwaysOn[c]), \{\}, metaLookup, undefined, isAb, null); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return \{ sgd, mh, ao \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const pct = await process('pct', false), abs = await process('abs', true);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0let imd = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0if (uploadedFiles.attribution.impressions) imd = parseCSVData(await readFile(uploadedFiles.attribution.impressions), \{\}, metaLookup, ['Campaign', 'Entity', 'Market'], true, null);
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const merge = (pm, am, im = \{\}) => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const res = \{ ...pm \};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.keys(am).forEach(k => \{ if (res[k]) M_TYPES.forEach(m => \{ if (m !== 'Impressions') GENDERS_KEYS.forEach(g => \{ AGE_BUCKETS.forEach(a => \{ if (am[k].metrics[m]) res[k].metrics[m][g][a].abs = am[k].metrics[m][g][a].abs; \}); \}); \}); \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.keys(im).forEach(k => \{ if (res[k]) GENDERS_KEYS.forEach(g => \{ AGE_BUCKETS.forEach(a => \{ if (im[k].metrics['Impressions']) res[k].metrics['Impressions'][g][a].v = im[k].metrics['Impressions'][g][a].v; \}); \}); \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return res;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const mG = merge(pct.sgd, abs.sgd, imd);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0route(mG, 'APAC');
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const rM = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0MARKET_SEGMENTS.forEach(m => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const mm = merge(pct.mh[m] || \{\}, abs.mh[m] || \{\}, imd);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0rM[m] = Object.values(mm).filter(r => r.meta && (!r.meta.market || eq(r.meta.market, m)));
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0route(mm, m);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0AO_CATEGORIES.forEach(c => route(merge(pct.ao[c] || \{\}, abs.ao[c] || \{\}, imd), null, 'AlwaysOn', c));
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const fS = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0Object.keys(structTemp).forEach(t => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0fS[t] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.keys(structTemp[t]).forEach(mk => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0fS[t][mk] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.keys(structTemp[t][mk]).forEach(sub => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0fS[t][mk][sub] = \{\};
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0Object.keys(structTemp[t][mk][sub]).forEach(ss => \{ fS[t][mk][sub][ss] = Object.values(structTemp[t][mk][sub][ss]); \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0const arrG = Object.values(mG);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0setGlobalData(arrG); setRegionalData(rM); setCampaignHubData(fS); setIsAnalyzed(true);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0await saveSnapshotToCloud(\{ reportingDate: dGlobalD, globalData: arrG, regionalData: rM, campaignHubData: fS \});
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\} catch (err) \{ console.error(err); \} finally \{ setIsAnalyzing(false); \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const handleFileUpload = (s, t, f, k) => setUploadedFiles(prev => \{\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0const upd = \{ ...prev[s] \};\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0if (t === 'countryHB' || t === 'alwaysOn') upd[t] = \{ ...upd[t], [k]: f \};\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0else upd[t] = f;\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0return \{ ...prev, [s]: upd \};\'a0
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\});
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0if (!isAnalyzed) return <LandingPage uploadedFiles=\{uploadedFiles\} handleFileUpload=\{handleFileUpload\} startAnalysis=\{startAnalysis\} isAnalyzing=\{isAnalyzing\} />;
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const allowed = activeTab === 'Global Hub' ? M_TYPES.filter(m => m !== 'Impressions') : M_TYPES;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0const filteredMetrics = activeMetrics.filter(m => allowed.includes(m));
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0<div className="flex h-screen bg-black text-[#e0e0e0] overflow-hidden font-sans">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<aside className=\{`$\{isSidebarOpen ? 'w-72' : 'w-20'\} transition-all duration-300 bg-[#111] border-r border-[#2a2a2a] flex flex-col z-50`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="p-6 flex items-center gap-3 mb-6 shrink-0 border-b border-[#2a2a2a]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="bg-[#FF0000] p-2 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/20"><Brain className="text-white w-5 h-5" /></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isSidebarOpen && <div><h2 className="text-lg font-bold tracking-tight">BRAIN <span className="text-[#FF0000]">2.0</span></h2><p className="text-[8px] font-bold uppercase text-[#555] tracking-widest">APAC Marketing Hub</p></div>\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{NAV_ITEMS.map(item => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const Icon = item.icon;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button key=\{item.id\} type="button" onClick=\{() => \{ if (item.id === 'Upload') setIsAnalyzed(false); else setActiveTab(item.id); \}\} className=\{`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer $\{activeTab === item.id ? 'bg-[#FF0000]/10 text-[#FF0000]' : 'text-[#808080] hover:text-white'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Icon className="w-5 h-5 shrink-0" />\{isSidebarOpen && <span className="text-[11px] font-bold uppercase tracking-wider">\{item.label\}</span>\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\})\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="my-4 border-t border-[#222]"></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => setIsCampaignTypeExpanded(!isCampaignTypeExpanded)\} className="w-full flex items-center justify-between p-3 rounded-xl text-[#808080] hover:text-white cursor-pointer">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-3"><FolderKanban className="w-5 h-5 shrink-0" />\{isSidebarOpen && <span className="text-[11px] font-bold uppercase tracking-widest">Campaign Hub</span>\}</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isSidebarOpen && (isCampaignTypeExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isCampaignTypeExpanded && isSidebarOpen && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="pl-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{CAMPAIGN_CHILDREN.map(child => \{
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0const Icon = child.icon;
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0return (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button key=\{child.id\} type="button" onClick=\{() => setActiveTab(child.id)\} className=\{`w-full flex items-center gap-3 p-3 rounded-lg transition-all cursor-pointer $\{activeTab === child.id ? 'bg-[#FF0000]/10 text-[#FF0000]' : 'text-[#555] hover:bg-white/5 hover:text-white'\}`\}>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<Icon className="w-4 h-4" />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{child.label\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\})\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{isSidebarOpen && memoryIndex.length > 0 && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="mt-8 pt-4 border-t border-[#222]">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-2 px-3 mb-3"><Database className="w-4 h-4 text-[#444]" /><span className="text-[10px] font-bold uppercase text-[#444] tracking-widest">Memory</span></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-1 max-h-[300px] overflow-y-auto">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{memoryIndex.map(snap => (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div key=\{snap.id\} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all hover:bg-white/5 group">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => \{ setGlobalData(snap.globalData || []); setRegionalData(snap.regionalData || \{\}); setCampaignHubData(snap.campaignHubData || \{\}); setLatestGlobalDate(snap.reportingDate); setIsAnalyzed(true); \}\} className="flex-1 text-[10px] font-bold text-[#666] group-hover:text-white">\{snap.weekId\}</button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => \{ if (user) deleteDoc(doc(getFirestore(), 'artifacts', appId, 'public', 'data', 'snapshots', snap.id)); \}\} className="opacity-0 group-hover:opacity-100"><Trash2 className="w-3 h-3 text-red-500" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0))\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</nav>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<button type="button" onClick=\{() => setIsSidebarOpen(!isSidebarOpen)\} className="p-6 border-t border-[#2a2a2a] text-[#555] hover:text-white flex items-center justify-center"><Menu className="w-5 h-5" /></button>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</aside>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<div className="flex-1 flex flex-col overflow-hidden relative">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<header className="px-8 py-5 border-b border-[#2a2a2a] flex items-center justify-between bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-40">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<h4 className="text-sm font-bold text-white uppercase tracking-widest">\{activeTab\}</h4>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4"><button type="button" className="bg-white text-black px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase hover:bg-[#e0e0e0] shadow-xl flex items-center gap-2"><Download className="w-3.5 h-3.5" /> Export</button></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</header>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<main className="flex-1 overflow-auto p-10 relative">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeTab === 'OKR' && <OKRAndRecsView globalData=\{globalData\} regionalData=\{regionalData\} latestDate=\{latestGlobalDate\} />\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{(activeTab === 'Global Hub' || activeTab === 'Market Hub') && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-8 animate-in fade-in duration-500">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<MetricControlHub activeMetrics=\{filteredMetrics\} allowedMetrics=\{allowed\} toggleMetric=\{m => setActiveMetrics(p => p.includes(m) ? (p.length > 1 ? p.filter(x => x !== m) : p) : [...p, m])\} handleAllToggle=\{() => setActiveMetrics(p => p.length === allowed.length ? ['DAU-SCT'] : [...allowed])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{activeTab === 'Market Hub' && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4 p-4 bg-[#111] rounded-xl border border-[#2a2a2a] w-fit shadow-lg"><MapPin className="w-6 h-6 text-red-600" /><select value=\{activeMarketSubTab\} onChange=\{e => setActiveMarketSubTab(e.target.value)\} className="bg-transparent text-white font-bold uppercase outline-none cursor-pointer pr-8">\{MARKET_SEGMENTS.map(m => <option key=\{m\} value=\{m\} className="bg-neutral-900">\{m\}</option>)\}</select></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<MasterTableView data=\{activeTab === 'Global Hub' ? globalData : (() => \{ const campaigns = regionalData[activeMarketSubTab] || []; const globalRef = globalData.find(d => eq(d.country, activeMarketSubTab) || eq(d.country, MARKET_KEYS[activeMarketSubTab])); return globalRef ? [\{ ...globalRef, isAnchor: true \}, ...campaigns] : campaigns; \})()\} activeMetrics=\{filteredMetrics\} isCampaignView=\{activeTab === 'Market Hub'\} hideDates=\{activeTab === 'Global Hub'\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\{CAMPAIGN_CHILDREN.some(c => c.id === activeTab) && (
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="space-y-8 animate-in fade-in duration-500">
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<MetricControlHub activeMetrics=\{filteredMetrics\} allowedMetrics=\{allowed\} toggleMetric=\{m => setActiveMetrics(p => p.includes(m) ? (p.length > 1 ? p.filter(x => x !== m) : p) : [...p, m])\} handleAllToggle=\{() => setActiveMetrics(p => p.length === allowed.length ? ['DAU-SCT'] : [...allowed])\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<div className="flex items-center gap-4 p-4 bg-[#111] rounded-xl border border-[#2a2a2a] w-fit shadow-lg"><MapPin className="w-6 h-6 text-red-600" /><select value=\{tabMarketFilter[activeTab]\} onChange=\{e => setTabMarketFilter(p => (\{ ...p, [activeTab]: e.target.value \}))\} className="bg-transparent text-white font-bold uppercase outline-none cursor-pointer pr-8">\{MARKET_SEGMENTS.map(m => <option key=\{m\} value=\{m\} className="bg-neutral-900">\{m\}</option>)\}</select></div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0<MasterTableView data=\{(() => \{ const mkt = tabMarketFilter[activeTab]; const sub = subTabFilter[activeTab] || 'Generic'; const ss = subSubTabFilter[activeTab] || 'Default'; const path = campaignHubData[activeTab]?.[mkt]?.[sub]; const rows = ss === 'Default' || !ss ? (path ? Object.values(path).flat() : []) : (path?.[ss] || []); return activeTab === 'AlwaysOn' ? [...rows].sort((a,b) => (a.campaignStartDate || '').localeCompare(b.campaignStartDate || '')) : rows; \})()\} activeMetrics=\{filteredMetrics\} isCampaignView isAlwaysOn=\{activeTab === 'AlwaysOn'\} />
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0)\}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0</main>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0<style>\{`
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0::-webkit-scrollbar \{ width: 5px; height: 5px; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0::-webkit-scrollbar-track \{ background: transparent; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0::-webkit-scrollbar-thumb \{ background: #2a2a2a; border-radius: 10px; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0::-webkit-scrollbar-thumb:hover \{ background: #444; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0.no-scrollbar::-webkit-scrollbar \{ display: none; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0select \{ appearance: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E") no-repeat right 0.5rem center; background-size: 1em; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0.animate-in \{ animation: fadeIn 0.4s ease-out; \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0@keyframes fadeIn \{ from \{ opacity: 0; transform: translateY(10px); \} to \{ opacity: 1; transform: translateY(0); \} \}
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0\'a0\'a0`\}</style>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0\'a0\'a0</div>
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \'a0\'a0);
+\f1\fs24 \strokec2 \
+
+\f0\fs29\fsmilli14667 \strokec2 \};
+\f1\fs24 \strokec2 \
+\
+
+\f0\fs29\fsmilli14667 \strokec2 export default App;
+\f1\fs24 \strokec2 \
+\
+}
