@@ -29,11 +29,22 @@
 <p class="p1"><span class="s1">// --- FIREBASE INTEGRATION ---</span></p>
 <p class="p1"><span class="s1">import { initializeApp } from 'firebase/app';</span></p>
 <p class="p1"><span class="s1">import { </span></p>
-<p class="p1"><span class="s1">  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot </span></p>
-<p class="p1"><span class="s1">} from 'firebase/firestore';</span></p>
-<p class="p1"><span class="s1">import { </span></p>
-<p class="p1"><span class="s1">  getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged </span></p>
-<p class="p1"><span class="s1">} from 'firebase/auth';</span></p>
+<p class="p1"><span class="s1">  { getAnalytics } from "firebase/analytics";</span></p>
+<p class="p1"><span class="s1">} </span></p>
+<p class="p1"><span class="s1">// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = { </span></p>
+<p class="p1"><span class="s1">  apiKey: "AIzaSyDZziTFGXohy9KzbINBa0R2GCqB3P0g5bA",
+  authDomain: "apac-shorts-sandbox-109110.firebaseapp.com",
+  projectId: "apac-shorts-sandbox-109110",
+  storageBucket: "apac-shorts-sandbox-109110.firebasestorage.app",
+  messagingSenderId: "99062594868",
+  appId: "1:99062594868:web:48cdb647a9ee9f43b3b961",
+  measurementId: "G-DGPHXMP79W"
+}; </span></p>
+<p class="p1"><span class="s1">} // Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);</span></p>
 <p class="p2"><span class="s1"></span><br></p>
 <p class="p1"><span class="s1">// --- 1. CONFIGURATION &amp; CONSTANTS ---</span></p>
 <p class="p1"><span class="s1">const M_TYPES = ['DAU-SCT', 'DAC-SCT', 'GenAI DAU-SCT', 'Impressions'];</span></p>
