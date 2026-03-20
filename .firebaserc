@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "apac-shorts-sandbox-109110"
+  },
+  "targets": {
+    "apac-shorts-sandbox-109110": {
+      "hosting": {
+        "main-site": [
+          "apac-shorts-brain-2"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
